@@ -1,0 +1,221 @@
+-------------------------------------------------------------------
+Mon Aug 20 23:58:06 UTC 2012 - agraf@suse.com
+
+- fix msg* to support iconv
+
+-------------------------------------------------------------------
+Mon Jul 30 12:44:25 UTC 2012 - adrian@suse.de
+
+- make /usr/armv7hl-suse-linux-gnueabi/usr a symlink to /usr which
+  can be used as gcc sysroot
+
+-------------------------------------------------------------------
+Fri Jul 13 12:38:13 UTC 2012 - agraf@suse.com
+
+- fix ld when using native version, but arguments are passed through file (@)
+
+-------------------------------------------------------------------
+Thu Jul  5 13:13:32 UTC 2012 - dmueller@suse.com
+
+- fix handling of ld arguments in ld wrapper
+
+-------------------------------------------------------------------
+Mon Jul  2 10:12:47 UTC 2012 - agraf@suse.com
+
+- inject qemu-arm in /qemu, so we can build the qemu package
+
+-------------------------------------------------------------------
+Sun Jul  1 16:12:26 UTC 2012 - agraf@suse.com
+
+- fix python
+
+-------------------------------------------------------------------
+Fri Jun 29 09:07:58 UTC 2012 - adrian@suse.de
+
+- add /opt/testing/bin/python from rpmlint-mini
+
+-------------------------------------------------------------------
+Fri Jun 22 10:14:31 UTC 2012 - adrian@suse.de
+
+- do not use cross ld when using LD_LIBRARY_PATH
+
+-------------------------------------------------------------------
+Thu Jun 21 15:07:01 UTC 2012 - adrian@suse.de
+
+- rename package to -armv7hl to allow another arm version later
+- move patchelf into own package
+
+-------------------------------------------------------------------
+Thu Jun 21 09:25:28 UTC 2012 - adrian@suse.de
+
+- follow -gnueabi name change of cross binutils
+
+-------------------------------------------------------------------
+Wed Jun 20 00:03:27 UTC 2012 - agraf@suse.com
+
+- enable cross-ld to work with emul compilers (add sysroot=/)
+  -> fixes gfortran for openmpi
+
+-------------------------------------------------------------------
+Tue Jun 19 20:10:56 UTC 2012 - agraf@suse.com
+
+- get rid of accel when gcc is invoked with LIBRARY_PATH set
+
+-------------------------------------------------------------------
+Tue Jun 19 07:38:17 UTC 2012 - adrian@suse.de
+
+- add expect, tar, rpm and rpmbuild binaries
+- add glibc support libs (libnsl.so.1 libnss_compat.so.2)
+- add symlink hack for glibc/rpmbuilg
+
+-------------------------------------------------------------------
+Sun Jun 17 21:19:52 UTC 2012 - agraf@suse.com
+
+- fix $emul/usr/bin/sh symlink
+- add programs: cat, mkdir, mv, patch, rm, rmdir
+
+-------------------------------------------------------------------
+Fri Jun 15 17:31:31 UTC 2012 - dmueller@suse.com
+
+- rename all paths to the new icecream name (armv7hl)
+
+-------------------------------------------------------------------
+Wed Jun 13 10:10:32 UTC 2012 - agraf@suse.com
+
+- add gcc-4.7 link
+
+-------------------------------------------------------------------
+Wed Jun 13 09:57:50 UTC 2012 - agraf@suse.com
+
+- move icecream code into its own %if pieces
+- reintroduce old cross gcc replacement (speeds up linking too)
+
+-------------------------------------------------------------------
+Tue Jun 12 13:22:25 UTC 2012 - adrian@suse.de
+
+- do not overwrite $PATH in icream.sh profile file
+
+-------------------------------------------------------------------
+Tue Jun 12 11:08:04 UTC 2012 - adrian@suse.de
+
+- set CC and CXX for icecream to exact binary (export ICECC_CC=/usr/bin/gcc-4.7)
+
+-------------------------------------------------------------------
+Wed Jun  6 13:29:06 UTC 2012 - coolo@suse.com
+
+- put schroot back in $PATH
+
+-------------------------------------------------------------------
+Wed Jun  6 08:37:19 UTC 2012 - coolo@suse.com
+
+- reeneable icecream after fixing gcc
+
+-------------------------------------------------------------------
+Mon Jun  4 18:51:04 UTC 2012 - agraf@suse.com
+
+- disable icecream until we solve the cross compiler .hidden issue
+
+-------------------------------------------------------------------
+Mon Jun  4 10:30:59 UTC 2012 - agraf@suse.com
+
+- expose native compiler as icecream, but hijack as icecream in /emul
+
+-------------------------------------------------------------------
+Mon Jun  4 09:29:45 UTC 2012 - agraf@suse.com
+
+- add msgexec to hijacked commands
+
+-------------------------------------------------------------------
+Mon Jun  4 06:09:45 UTC 2012 - agraf@suse.com
+
+- add [e]grep to hijacked commands
+
+-------------------------------------------------------------------
+Mon Jun  4 06:07:33 UTC 2012 - agraf@suse.com
+
+- add expr to hijacked commands
+
+-------------------------------------------------------------------
+Mon Jun  4 06:02:23 UTC 2012 - agraf@suse.com
+
+- add symlink for /usr/bin/sh -> /bin/bash in emul dir
+
+-------------------------------------------------------------------
+Fri Jun  1 09:43:40 UTC 2012 - adrian@suse.de
+
+- add icecream gcc/binutils backends. To be used by a to-developed
+  icecream mode.
+
+-------------------------------------------------------------------
+Tue May 29 17:31:35 UTC 2012 - agraf@suse.com
+
+- enable bash hijack
+
+-------------------------------------------------------------------
+Thu May 17 09:57:00 UTC 2012 - agraf@suse.com
+
+- speed up translation-update-upstream
+
+-------------------------------------------------------------------
+Wed May  2 21:32:19 UTC 2012 - adrian@suse.de
+
+- disable native gcc because it has wrong internal pathes
+
+-------------------------------------------------------------------
+Fri Apr 27 11:52:15 UTC 2012 - adrian@suse.de
+
+- fix icecream gcc backend tar ball name
+
+-------------------------------------------------------------------
+Mon Apr 23 14:12:42 UTC 2012 - adrian@suse.de
+
+- use standard cross-arm-binutils package instead of our own -armv7l- one
+
+-------------------------------------------------------------------
+Mon Apr 23 07:38:53 UTC 2012 - adrian@suse.de
+
+- fix binutils sysroot path
+- fix cross gcc icecream package name for gcc47
+
+-------------------------------------------------------------------
+Fri Feb 24 15:28:47 UTC 2012 - agraf@suse.com
+
+- add objdump/objcopy
+
+-------------------------------------------------------------------
+Fri Feb 10 01:23:11 UTC 2012 - agraf@suse.com
+
+- add msgfmt (.po generation)
+
+-------------------------------------------------------------------
+Wed Feb  8 03:04:02 UTC 2012 - agraf@suse.com
+
+- add sed
+
+-------------------------------------------------------------------
+Tue Feb  7 18:24:23 UTC 2012 - agraf@suse.com
+
+- add icecream gcc and binutils to hijack things
+
+-------------------------------------------------------------------
+Tue Feb  7 15:46:21 UTC 2012 - agraf@suse.com
+
+- add sanity check to make sure host arch isn't exposed in the
+  binaries we add
+
+-------------------------------------------------------------------
+Mon Feb  6 15:43:54 UTC 2012 - agraf@suse.com
+
+- add "gzip" to binaries
+
+-------------------------------------------------------------------
+Mon Feb  6 12:21:19 UTC 2012 - adrian@suse.de
+
+- adding "make" to binaries
+
+-------------------------------------------------------------------
+Sat Feb  4 14:20:10 UTC 2012 - adrian@suse.de
+
+- initial version of qemu-accel packge
+- just bash, bzip2 and xz inside for basic testing
+
