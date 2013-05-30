@@ -1,3 +1,6 @@
+* Thu May 30 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130530.115151@0b238a7
+- Add rpmdb to binary list
+
 * Thu May 30 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130530.111119@de0b4dd
 - Fix build on ARM
 

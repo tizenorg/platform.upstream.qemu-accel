@@ -60,7 +60,7 @@ with native binaries.
 %build
 
 %install
-binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2" # loaded via dlopen by glibc
+binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2 %{_libdir}/rpm-plugins/msm.so" # loaded via dlopen by glibc
 %ifarch %ix86
   LD="/lib/ld-linux.so.2"
 %else
@@ -76,7 +76,7 @@ binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2" # loaded via dlopen by g
 #     /opt/testing/bin/python: error while loading shared libraries: libpython2.7.so.1.0: wrong ELF class: ELFCLASS32
 
 for executable in $LD \
-   /usr/bin/{bash,rpm} \
+   /usr/bin/{bash,rpm,rpmdb} \
    /usr/bin/{gzip,grep,egrep,sed,tar} \
    /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /lib64/libfreebl3.so \
    /usr/bin/{bzip2,cat,expr,make,m4,mkdir,msgexec,msgfmt,msgcat,msgmerge,mv,patch,rm,rmdir,rpmbuild,xz,xzdec} \
