@@ -1,3 +1,6 @@
+* Thu May 30 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130530.111119@de0b4dd
+- Fix build on ARM
+
 * Thu May 30 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130530.104715@e8395c9
 - link to right bash
 

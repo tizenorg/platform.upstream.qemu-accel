@@ -1,3 +1,21 @@
+#
+# spec file for package qemu-accel-armv7hl
+#
+# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+
+# Please submit bugfixes or comments via http://bugs.opensuse.org/
+#
+
+
 # Choose which gcc hijack method (if any) to use.
 # Only select one of the two at a time!
 %define hijack_gcc 1
@@ -10,7 +28,7 @@ BuildRequires:  cross-arm-binutils
 BuildRequires:  cross-armv7hl-gcc47-icecream-backend
 #BuildRequires:  expect
 BuildRequires:  fdupes
-BuildRequires:	glibc-locale
+BuildRequires:  glibc-locale
 BuildRequires:  gcc-c++
 BuildRequires:  gettext-runtime
 BuildRequires:  gettext-tools
@@ -60,7 +78,7 @@ binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2" # loaded via dlopen by g
 for executable in $LD \
    /usr/bin/{bash,rpm} \
    /usr/bin/{gzip,grep,egrep,sed,tar} \
-   /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /usr/lib64/libfreebl3.so \
+   /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /lib64/libfreebl3.so \
    /usr/bin/{bzip2,cat,expr,make,m4,mkdir,msgexec,msgfmt,msgcat,msgmerge,mv,patch,rm,rmdir,rpmbuild,xz,xzdec} \
    /usr/arm-tizen-linux-gnueabi/bin/{as,ar,ld,ld.bfd,objcopy,objdump}
 do  
@@ -118,8 +136,8 @@ mkdir -p %{buildroot}/usr/lib64/gconv
 cp -a /usr/lib64/gconv/* "%{buildroot}/usr/lib64/gconv/"
 
 # create symlinks for bash
-#ln -sf bash "%{buildroot}%{our_path}/bin/sh"
-ln -sf ../../bin/bash "%{buildroot}%{our_path}/usr/bin/sh"
+#ln -sf ../usr/bin/bash "%{buildroot}%{our_path}/bin/sh"
+#ln -sf ../../bin/bash "%{buildroot}%{our_path}/usr/bin/sh"
 
 # binutils needs to be exposed in /usr/bin
 for i in ar ld ld.bfd objcopy objdump; do
@@ -248,7 +266,7 @@ builtin echo "All done"
 
 # Fix up sysroot paths
 rm -rf /usr/armv7hl-tizen-linux-gnueabi/lib
-ln -s /lib /usr/armv7hl-tizen-linux-gnueabi/lib
+ln -s /lib /usr/armv7hl-tizen-linux-gnueabi/usr/lib
 
 %files
 %defattr(-,root,root)  
