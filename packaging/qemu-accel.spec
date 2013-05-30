@@ -118,7 +118,7 @@ mkdir -p %{buildroot}/usr/lib64/gconv
 cp -a /usr/lib64/gconv/* "%{buildroot}/usr/lib64/gconv/"
 
 # create symlinks for bash
-ln -sf bash "%{buildroot}%{our_path}/bin/sh"
+#ln -sf bash "%{buildroot}%{our_path}/bin/sh"
 ln -sf ../../bin/bash "%{buildroot}%{our_path}/usr/bin/sh"
 
 # binutils needs to be exposed in /usr/bin
