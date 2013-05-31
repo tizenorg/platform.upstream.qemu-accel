@@ -143,6 +143,7 @@ cp -a /usr/lib64/gconv/* "%{buildroot}/usr/lib64/gconv/"
 for i in ar ld ld.bfd objcopy objdump; do
   ln -s ../arm-tizen-linux-gnueabi/bin/$i %{buildroot}%{our_path}/usr/bin/$i
 done
+pushd %{buildroot}%{our_path} &&  ln -s usr/bin && popd
 
 %if %hijack_gcc
 # create symlinks for lib64 / lib mappings (gcc!)
