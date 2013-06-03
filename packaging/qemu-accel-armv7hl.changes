@@ -1,3 +1,6 @@
+* Mon Jun 03 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130531.044522@60cac50
+- add armv7l support
+
 * Fri May 31 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130530.193729@55972e4
 - link bin to usr/bin
 
