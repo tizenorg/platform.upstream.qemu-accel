@@ -109,7 +109,7 @@ install -d -m0777 %buildroot%{our_path}/usr/share/icecream-envs
 
 for binary in $binaries
 do
-  outfile=%buildroot%{our_path}$(echo $binary | sed 's:cross-compiler-tmp::;s:/opt/cross/armv7hl-tizen-linux-gnueabi:/usr:')
+  outfile=%buildroot%{our_path}$(echo $binary | sed 's:cross-compiler-tmp::;s:/opt/cross/armv7l-tizen-linux-gnueabi:/usr:')
   [ -f $outfile ] && continue
   mkdir -p ${outfile%/*}
   cp -aL $binary $outfile
@@ -149,8 +149,8 @@ pushd %{buildroot}%{our_path} &&  ln -s usr/bin && popd
 # create symlinks for lib64 / lib mappings (gcc!)
 mkdir -p "%{buildroot}%{our_path}/usr/lib/"
 # binutils secondary directories
-mkdir -p %{buildroot}%{our_path}/usr/armv7hl-tizen-linux-gnueabi/
-ln -sf ../bin %{buildroot}%{our_path}/usr/armv7hl-tizen-linux-gnueabi/bin
+mkdir -p %{buildroot}%{our_path}/usr/armv7l-tizen-linux-gnueabi/
+ln -sf ../bin %{buildroot}%{our_path}/usr/armv7l-tizen-linux-gnueabi/bin
 
 ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
 # g++ can also be called c++
@@ -215,8 +215,8 @@ exec -a "$0" %{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld.real --sysroot=/ "$@
 chmod +x %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld
 
 # To support gcc sysroot
-mkdir -p %{buildroot}/usr/armv7hl-tizen-linux-gnueabi
-ln -sf .. %{buildroot}/usr/armv7hl-tizen-linux-gnueabi/usr
+mkdir -p %{buildroot}/usr/armv7l-tizen-linux-gnueabi
+ln -sf .. %{buildroot}/usr/armv7l-tizen-linux-gnueabi/usr
 %endif
 
 # Make QEMU available through /qemu
@@ -233,7 +233,7 @@ if [ $(uname -m) = armv7l ]; then
     echo "armv7l arch"
     # XXX find a way around this for cross-gcc
     mkdir -p /usr/lib64/gcc /lib64 || true
-    ln -sf ../../lib/gcc/armv7hl-tizen-linux-gnueabi /usr/lib64/gcc/armv7hl-tizen-linux-gnueabi || true
+    ln -sf ../../lib/gcc/armv7l-tizen-linux-gnueabi /usr/lib64/gcc/armv7l-tizen-linux-gnueabi || true
     ln -sf %{our_path}/lib64/libnsl.so.1 /lib64/libnsl.so.1 || true
 fi
 # use qemu-arm{,-binfmt} from a  safe directory, so even overwriting
@@ -267,13 +267,13 @@ fi
 builtin echo "All done"
 
 # Fix up sysroot paths
-rm -rf /usr/armv7hl-tizen-linux-gnueabi/lib
-ln -s /lib /usr/armv7hl-tizen-linux-gnueabi/usr/lib
+rm -rf /usr/armv7l-tizen-linux-gnueabi/lib
+ln -s /lib /usr/armv7l-tizen-linux-gnueabi/usr/lib
 
 %files
 %defattr(-,root,root)  
-%dir /usr/armv7hl-tizen-linux-gnueabi
-/usr/armv7hl-tizen-linux-gnueabi/usr
+%dir /usr/armv7l-tizen-linux-gnueabi
+/usr/armv7l-tizen-linux-gnueabi/usr
 /emul
 /qemu
 /usr/lib64
