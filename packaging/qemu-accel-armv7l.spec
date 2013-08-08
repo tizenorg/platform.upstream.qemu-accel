@@ -25,7 +25,7 @@ Version:        0.2
 Release:        0
 AutoReqProv:    off
 BuildRequires:  cross-arm-binutils
-BuildRequires:  cross-armv7l-gcc47-icecream-backend
+BuildRequires:  cross-armv7l-gcc48-icecream-backend
 #BuildRequires:  expect
 BuildRequires:  fdupes
 BuildRequires:  glibc-locale
@@ -47,7 +47,7 @@ ExclusiveArch:  x86_64
 # default path in qemu
 %define HOST_ARCH %(echo %{_host_cpu} | sed -e "s/i.86/i586/;s/ppc/powerpc/;s/sparc64.*/sparc64/;s/sparcv.*/sparc/;")
 %define our_path /emul/%{HOST_ARCH}-for-arm
-%define icecream_cross_env cross-armv7l-gcc47-icecream-backend_x86_64
+%define icecream_cross_env cross-armv7l-gcc48-icecream-backend_x86_64
 
 %description
 This package is used in armv7l architecture builds using qemu to speed up builds
@@ -88,7 +88,7 @@ done
 %if %hijack_gcc
 # extract cross-compiler
 mkdir -p cross-compiler-tmp
-for executable in $(tar -C cross-compiler-tmp -xvzf /usr/share/icecream-envs/cross-armv7l-gcc47-icecream-backend_*.tar.gz); do
+for executable in $(tar -C cross-compiler-tmp -xvzf /usr/share/icecream-envs/cross-armv7l-gcc48-icecream-backend_*.tar.gz); do
     if [ ! -d "cross-compiler-tmp/$executable" ]; then
         binaries="$binaries cross-compiler-tmp/$executable"
     fi
@@ -102,7 +102,7 @@ mkdir -p %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env}
 cp -a /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz \
       %buildroot%{our_path}/usr/share/icecream-envs
 # And extract it for direct usage
-tar xvz -C %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env} -f /usr/share/icecream-envs/cross-armv7l-gcc47-icecream-backend_*.tar.gz
+tar xvz -C %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env} -f /usr/share/icecream-envs/cross-armv7l-gcc48-icecream-backend_*.tar.gz
 # It needs a tmp working directory which is writable
 install -d -m0777 %buildroot%{our_path}/usr/share/icecream-envs
 %endif
@@ -157,8 +157,8 @@ ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
 ln -sf g++ "%{buildroot}%{our_path}/usr/bin/c++"
 # gcc can also be called cc
 ln -sf gcc "%{buildroot}%{our_path}/usr/bin/cc"
-# gcc can also be called gcc-4.7
-ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-4.7"
+# gcc can also be called gcc-4.8
+ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-4.8"
 
 # nasty hack: If LIBRARY_PATH is set, native gcc adds the contents to its
 #             library search list, but cross gcc does not. So switch to all
