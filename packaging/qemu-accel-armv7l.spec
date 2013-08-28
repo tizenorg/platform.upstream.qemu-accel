@@ -230,7 +230,7 @@ export NO_BRP_CHECK_RPATH="true"
 %post
 set -x
 if [ $(uname -m) = armv7l ]; then
-    echo "armv7l arch"
+    builtin echo "armv7l arch"
     # XXX find a way around this for cross-gcc
     mkdir -p /usr/lib64/gcc /lib64 || true
     ln -sf ../../lib/gcc/armv7l-tizen-linux-gnueabi /usr/lib64/gcc/armv7l-tizen-linux-gnueabi || true

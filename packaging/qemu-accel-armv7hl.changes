@@ -1,3 +1,6 @@
+* Tue Aug 27 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130711.123431@93c2970
+- support gcc 48
+
 * Mon Jun 03 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130531.044522@60cac50
 - add armv7l support
 
