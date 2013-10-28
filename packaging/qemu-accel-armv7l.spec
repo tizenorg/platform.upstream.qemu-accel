@@ -42,12 +42,12 @@ Requires:       coreutils
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Libraries/Cross
-ExclusiveArch:  x86_64
+ExclusiveArch:  %{ix86}
 
 # default path in qemu
 %define HOST_ARCH %(echo %{_host_cpu} | sed -e "s/i.86/i586/;s/ppc/powerpc/;s/sparc64.*/sparc64/;s/sparcv.*/sparc/;")
 %define our_path /emul/%{HOST_ARCH}-for-arm
-%define icecream_cross_env cross-armv7l-gcc48-icecream-backend_x86_64
+%define icecream_cross_env cross-armv7l-gcc48-icecream-backend_i386
 
 %description
 This package is used in armv7l architecture builds using qemu to speed up builds
@@ -78,7 +78,7 @@ binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2 %{_libdir}/rpm-plugins/ms
 for executable in $LD \
    /usr/bin/{bash,rpm,rpmdb} \
    /usr/bin/{gzip,grep,egrep,sed,tar} \
-   /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /lib64/libfreebl3.so \
+   /usr/lib/libnssdbm3.so /usr/lib/libsoftokn3.so /lib/libfreebl3.so \
    /usr/bin/{bzip2,cat,expr,make,m4,mkdir,msgexec,msgfmt,msgcat,msgmerge,mv,patch,rm,rmdir,rpmbuild,xz,xzdec} \
    /usr/arm-tizen-linux-gnueabi/bin/{as,ar,ld,ld.bfd,objcopy,objdump}
 do  
@@ -114,11 +114,11 @@ do
   mkdir -p ${outfile%/*}
   cp -aL $binary $outfile
   # XXX hack alert! Only works for armv7l-on-x86_64
-  [ "$(basename $outfile)" = "bash" ] && sed -i 's/x86_64/armv7l/g' "$outfile"
+#  [ "$(basename $outfile)" = "bash" ] && sed -i 's/x86_64/armv7l/g' "$outfile"
   objdump -s -j .rodata -j .data $outfile | sed 's/^ *\([a-z0-9]*\)/\1:/' | \
       grep ': ' | grep -v 'file format' | grep -v 'Contents of section' | \
       xxd -g4 -r - $outfile.data
-  if grep -q "%{HOST_ARCH}"$outfile.data; then
+  if grep -q "%{HOST_ARCH} "$outfile.data; then
     echo "ERROR file $binary leaks host information into the guest"
     exit 1
   fi
@@ -132,8 +132,8 @@ do
 done
 
 # make gconv libraries available (needed for msg*)
-mkdir -p %{buildroot}/usr/lib64/gconv
-cp -a /usr/lib64/gconv/* "%{buildroot}/usr/lib64/gconv/"
+#mkdir -p %{buildroot}/usr/lib/gconv
+#cp -a /usr/lib/gconv/* "%{buildroot}/usr/lib/gconv/"
 
 # create symlinks for bash
 #ln -sf ../usr/bin/bash "%{buildroot}%{our_path}/bin/sh"
@@ -152,7 +152,7 @@ mkdir -p "%{buildroot}%{our_path}/usr/lib/"
 mkdir -p %{buildroot}%{our_path}/usr/armv7l-tizen-linux-gnueabi/
 ln -sf ../bin %{buildroot}%{our_path}/usr/armv7l-tizen-linux-gnueabi/bin
 
-ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
+ln -sf ../lib/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
 # g++ can also be called c++
 ln -sf g++ "%{buildroot}%{our_path}/usr/bin/c++"
 # gcc can also be called cc
@@ -232,9 +232,9 @@ set -x
 if [ $(uname -m) = armv7l ]; then
     builtin echo "armv7l arch"
     # XXX find a way around this for cross-gcc
-    mkdir -p /usr/lib64/gcc /lib64 || true
-    ln -sf ../../lib/gcc/armv7l-tizen-linux-gnueabi /usr/lib64/gcc/armv7l-tizen-linux-gnueabi || true
-    ln -sf %{our_path}/lib64/libnsl.so.1 /lib64/libnsl.so.1 || true
+    mkdir -p /usr/lib/gcc /lib || true
+    ln -sf ../../lib/gcc/armv7l-tizen-linux-gnueabi /usr/lib/gcc/armv7l-tizen-linux-gnueabi || true
+    ln -sf %{our_path}/lib/libnsl.so.1 /lib/libnsl.so.1 || true
 fi
 # use qemu-arm{,-binfmt} from a  safe directory, so even overwriting
 # /usr/bin/$file won't affect our ability to run arm code
@@ -276,6 +276,5 @@ ln -s /lib /usr/armv7l-tizen-linux-gnueabi/usr/lib
 /usr/armv7l-tizen-linux-gnueabi/usr
 /emul
 /qemu
-/usr/lib64
 
 %changelog
