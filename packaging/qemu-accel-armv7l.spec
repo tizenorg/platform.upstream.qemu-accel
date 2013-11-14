@@ -21,8 +21,9 @@
 %define hijack_gcc 1
 
 Name:           qemu-accel-armv7l
-Version:        0.2
+Version:        0.3
 Release:        0
+VCS:            platform/upstream/qemu-accel#submit/tizen/20131025.201555-0-g039eeafa6b52fd126f38fed9cd2fdf36a26a3065
 AutoReqProv:    off
 BuildRequires:  cross-arm-binutils
 BuildRequires:  cross-armv7l-gcc48-icecream-backend
@@ -217,6 +218,7 @@ chmod +x %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld
 # To support gcc sysroot
 mkdir -p %{buildroot}/usr/armv7l-tizen-linux-gnueabi
 ln -sf .. %{buildroot}/usr/armv7l-tizen-linux-gnueabi/usr
+ln -sf ../include %{buildroot}/usr/armv7l-tizen-linux-gnueabi/include
 %endif
 
 # Make QEMU available through /qemu
@@ -274,6 +276,7 @@ ln -s /lib /usr/armv7l-tizen-linux-gnueabi/usr/lib
 %defattr(-,root,root)  
 %dir /usr/armv7l-tizen-linux-gnueabi
 /usr/armv7l-tizen-linux-gnueabi/usr
+/usr/armv7l-tizen-linux-gnueabi/include
 /emul
 /qemu
 /usr/lib64
