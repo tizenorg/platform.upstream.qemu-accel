@@ -1,0 +1,8 @@
+Code-Review+1: Junfeng dong <junfeng.dong@intel.com>
+Code-Review+2: Casey Schaufler <casey.schaufler@intel.com>
+Verified+1: Bogon Kim <bogon82.kim@samsung.com>
+Submitted-by: Jinkun Jang <jinkun.jang@samsung.com>
+Submitted-at: Sun, 17 Nov 2013 17:47:18 -0800
+Reviewed-on: https://review.tizen.org/gerrit/12354
+Project: platform/upstream/qemu-accel
+Branch: refs/heads/tizen
