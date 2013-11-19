@@ -21,7 +21,7 @@
 %define hijack_gcc 1
 
 Name:           qemu-accel-armv7l
-Version:        0.3
+Version:        0.4
 Release:        0
 VCS:            platform/upstream/qemu-accel#submit/tizen/20131025.201555-0-g039eeafa6b52fd126f38fed9cd2fdf36a26a3065
 AutoReqProv:    off
@@ -43,12 +43,16 @@ Requires:       coreutils
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Libraries/Cross
-ExclusiveArch:  x86_64
+ExclusiveArch:  x86_64 %ix86
 
 # default path in qemu
 %define HOST_ARCH %(echo %{_host_cpu} | sed -e "s/i.86/i586/;s/ppc/powerpc/;s/sparc64.*/sparc64/;s/sparcv.*/sparc/;")
 %define our_path /emul/%{HOST_ARCH}-for-arm
+%ifarch %ix86
+%define icecream_cross_env cross-armv7l-gcc48-icecream-backend_i386
+%else
 %define icecream_cross_env cross-armv7l-gcc48-icecream-backend_x86_64
+%endif
 
 %description
 This package is used in armv7l architecture builds using qemu to speed up builds
@@ -79,7 +83,11 @@ binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2 %{_libdir}/rpm-plugins/ms
 for executable in $LD \
    /usr/bin/{bash,rpm,rpmdb} \
    /usr/bin/{gzip,grep,egrep,sed,tar} \
+%ifarch %ix86
+   /usr/lib/libnssdbm3.so /usr/lib/libsoftokn3.so /lib/libfreebl3.so \
+%else
    /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /lib64/libfreebl3.so \
+%endif
    /usr/bin/{bzip2,cat,expr,make,m4,mkdir,msgexec,msgfmt,msgcat,msgmerge,mv,patch,rm,rmdir,rpmbuild,xz,xzdec} \
    /usr/arm-tizen-linux-gnueabi/bin/{as,ar,ld,ld.bfd,objcopy,objdump}
 do  
@@ -115,7 +123,9 @@ do
   mkdir -p ${outfile%/*}
   cp -aL $binary $outfile
   # XXX hack alert! Only works for armv7l-on-x86_64
+%ifarch x86_64
   [ "$(basename $outfile)" = "bash" ] && sed -i 's/x86_64/armv7l/g' "$outfile"
+%endif
   objdump -s -j .rodata -j .data $outfile | sed 's/^ *\([a-z0-9]*\)/\1:/' | \
       grep ': ' | grep -v 'file format' | grep -v 'Contents of section' | \
       xxd -g4 -r - $outfile.data
@@ -133,8 +143,10 @@ do
 done
 
 # make gconv libraries available (needed for msg*)
+%ifarch x86_64
 mkdir -p %{buildroot}/usr/lib64/gconv
 cp -a /usr/lib64/gconv/* "%{buildroot}/usr/lib64/gconv/"
+%endif
 
 # create symlinks for bash
 #ln -sf ../usr/bin/bash "%{buildroot}%{our_path}/bin/sh"
@@ -153,7 +165,11 @@ mkdir -p "%{buildroot}%{our_path}/usr/lib/"
 mkdir -p %{buildroot}%{our_path}/usr/armv7l-tizen-linux-gnueabi/
 ln -sf ../bin %{buildroot}%{our_path}/usr/armv7l-tizen-linux-gnueabi/bin
 
+%ifarch %ix86
+ln -sf ../lib/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
+%else
 ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
+%endif
 # g++ can also be called c++
 ln -sf g++ "%{buildroot}%{our_path}/usr/bin/c++"
 # gcc can also be called cc
@@ -279,6 +295,8 @@ ln -s /lib /usr/armv7l-tizen-linux-gnueabi/usr/lib
 /usr/armv7l-tizen-linux-gnueabi/include
 /emul
 /qemu
+%ifarch x86_64
 /usr/lib64
+%endif
 
 %changelog
