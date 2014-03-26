@@ -208,6 +208,13 @@ cp -L /usr/bin/qemu-arm{,-binfmt} %buildroot/qemu/
 
 export NO_BRP_CHECK_RPATH="true"
 
+# Install glibc-locale, otherwise msgmerge >= 0.18.3 fails
+cp -R /usr/lib/{gconv,locale} %{buildroot}%{our_path}/usr/lib
+cp -R /usr/share/locale %{buildroot}%{our_path}/usr/share
+# Fix permissions for abuild
+chmod 777 %{buildroot}%{our_path}/usr/lib/{gconv,locale}
+chmod 777 %{buildroot}%{our_path}/usr/share/locale
+
 %post
 set -x
 if [ $(uname -m) = armv7l ]; then
