@@ -163,7 +163,7 @@ exec -a /usr/bin/as %{our_path}/usr/bin/as.real -meabi=5 "$@"
 chmod +x %{buildroot}%{our_path}/usr/bin/as
 
 # allow abuild to do the mv
-chmod 777 %{buildroot}/emul
+chmod 755 %{buildroot}/emul
 
 # make cross ld work with emulated compilers
 mv %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld{,.real}
@@ -207,6 +207,13 @@ cp -L /usr/bin/qemu-arm{,-binfmt} %buildroot/qemu/
 %fdupes -s %{buildroot}
 
 export NO_BRP_CHECK_RPATH="true"
+
+# Install glibc-locale, otherwise msgmerge >= 0.18.3 fails
+cp -R /usr/lib/{gconv,locale} %{buildroot}%{our_path}/usr/lib
+cp -R /usr/share/locale %{buildroot}%{our_path}/usr/share
+# Fix permissions for abuild
+chmod 755 %{buildroot}%{our_path}/usr/lib/{gconv,locale}
+chmod 755 %{buildroot}%{our_path}/usr/share/locale
 
 %post
 set -x
