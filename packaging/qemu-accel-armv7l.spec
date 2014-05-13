@@ -246,10 +246,17 @@ cp -L /usr/bin/qemu-arm{,-binfmt} %buildroot/qemu/
 export NO_BRP_CHECK_RPATH="true"
 
 # Install glibc-locale, otherwise msgmerge >= 0.18.3 fails
+%ifarch x86_64
+cp -R /usr/lib64/gconv %{buildroot}%{our_path}/usr/lib64
+cp -R /usr/lib/locale %{buildroot}%{our_path}/usr/lib
+chmod 755 %{buildroot}%{our_path}/usr/lib/locale
+chmod 755 %{buildroot}%{our_path}/usr/lib64/gconv
+%else
 cp -R /usr/lib/{gconv,locale} %{buildroot}%{our_path}/usr/lib
+chmod 755 %{buildroot}%{our_path}/usr/lib/{gconv,locale}
+%endif
 cp -R /usr/share/locale %{buildroot}%{our_path}/usr/share
 # Fix permissions for abuild
-chmod 755 %{buildroot}%{our_path}/usr/lib/{gconv,locale}
 chmod 755 %{buildroot}%{our_path}/usr/share/locale
 
 %post
