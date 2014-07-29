@@ -22,6 +22,7 @@
 
 # Define version of GCC used as cross compiler
 %define gcc_version 49
+%define gcc_version_dot 4.9 
 
 Name:           qemu-accel-armv7l
 Version:        0.4
@@ -177,8 +178,8 @@ ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
 ln -sf g++ "%{buildroot}%{our_path}/usr/bin/c++"
 # gcc can also be called cc
 ln -sf gcc "%{buildroot}%{our_path}/usr/bin/cc"
-# gcc can also be called gcc-4.8
-ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-4.8"
+# gcc can also be called gcc-%{gcc_version_dot}
+ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-%{gcc_version_dot}"
 
 # nasty hack: If LIBRARY_PATH is set, native gcc adds the contents to its
 #             library search list, but cross gcc does not. So switch to all
