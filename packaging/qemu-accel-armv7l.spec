@@ -184,15 +184,18 @@ ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-%{gcc_version_dot}"
 # nasty hack: If LIBRARY_PATH is set, native gcc adds the contents to its
 #             library search list, but cross gcc does not. So switch to all
 #             native in these situations.
-mv %{buildroot}%{our_path}/usr/bin/gcc{,.real}
-echo '#!/bin/bash
-if [ "$LIBRARY_PATH" ]; then
-  mv %{our_path}{,.bkp}
-  exec /usr/bin/qemu-arm /usr/bin/gcc "$@"
-fi
-exec -a /usr/bin/gcc %{our_path}/usr/bin/gcc.real "$@"
-' > %{buildroot}%{our_path}/usr/bin/gcc
-chmod +x %{buildroot}%{our_path}/usr/bin/gcc
+for compiler in gcc g++
+do
+  mv %{buildroot}%{our_path}/usr/bin/${compiler}{,.real}
+  echo '#!/bin/bash
+  if [ "$LIBRARY_PATH" ]; then
+    mv %{our_path}{,.bkp}
+    exec /usr/bin/qemu-aarch64 /usr/bin/'${compiler}' "$@"
+  fi
+  exec -a /usr/bin/'${compiler}' %{our_path}/usr/bin/'${compiler}'.real "$@" -B%{our_path}/usr/armv7l-tizen-linux-gnueabi/bin -B%{our_path}/%{_libdir}/gcc/armv7l-tizen-linux-gnueabi/%{gcc_version_dot}
+  ' > %{buildroot}%{our_path}/usr/bin/${compiler}
+  chmod +x %{buildroot}%{our_path}/usr/bin/${compiler}
+done
 #
 # as is not writing right EABI ELF header inside of arm environment for unknown reason
 #
