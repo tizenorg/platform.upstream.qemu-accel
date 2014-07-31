@@ -234,7 +234,7 @@ for i in "$@"; do
   fi
 done
 
-exec -a "$0" %{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld.real --sysroot=/ "$@"
+%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld.real --sysroot=/ "$@" || ( /usr/bin/qemu-arm /usr/armv7l-tizen-linux-gnueabi/bin/ld -L/usr/lib/gcc/armv7l-tizen-linux-gnueabi/4.9/ "$@"; echo "Running native ld, because cross ld has failed with the following error: " )
 ' > %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld
 chmod +x %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld
 
