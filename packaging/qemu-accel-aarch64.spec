@@ -318,7 +318,7 @@ if [ -n "$LD_LIBRARY_PATH" ]; then
       args=(${args[@]} "$i")
     fi
   done
-  exec /usr/bin/qemu-aarch64 /usr/bin/ld "${args[@]}"
+  exec /usr/bin/qemu-aarch64 /usr/bin/ld `echo "${args[@]}" | sed -e "s#%{our_path}##"`
 fi
 for i in "$@"; do
   if [ "${i:0:10}" = "--sysroot=" ]; then
@@ -326,7 +326,7 @@ for i in "$@"; do
   fi
 done
 
-exec -a "$0" %{our_path}/usr/aarch64-tizen-linux/bin/ld.real --sysroot=/ "$@"
+%{our_path}/usr/aarch64-tizen-linux/bin/ld.real --sysroot=/ "$@" || ( /usr/bin/qemu-aarch64 /usr/aarch64-tizen-linux/bin/ld -L/usr/lib/gcc/aarch64-tizen-linux/4.9/ `echo "$@" | sed -e "s#%{our_path}##"` ; echo "Running native ld, because cross ld has failed with the following error: " )
 ' > %{buildroot}%{our_path}/usr/aarch64-tizen-linux/bin/ld
 chmod +x %{buildroot}%{our_path}/usr/aarch64-tizen-linux/bin/ld
 
