@@ -226,7 +226,7 @@ if [ -n "$LD_LIBRARY_PATH" ]; then
       args=(${args[@]} "$i")
     fi
   done
-  exec /usr/bin/qemu-arm /usr/bin/ld "${args[@]}"
+  exec /usr/bin/qemu-arm /usr/bin/ld `echo "${args[@]}" | sed -e "s#%{our_path}##"`
 fi
 for i in "$@"; do
   if [ "${i:0:10}" = "--sysroot=" ]; then
@@ -234,7 +234,7 @@ for i in "$@"; do
   fi
 done
 
-%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld.real --sysroot=/ "$@" || ( /usr/bin/qemu-arm /usr/armv7l-tizen-linux-gnueabi/bin/ld -L/usr/lib/gcc/armv7l-tizen-linux-gnueabi/4.9/ "$@"; echo "Running native ld, because cross ld has failed with the following error: " )
+%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld.real --sysroot=/ "$@" || ( /usr/bin/qemu-arm /usr/armv7l-tizen-linux-gnueabi/bin/ld -L/usr/lib/gcc/armv7l-tizen-linux-gnueabi/4.9/ `echo "$@" | sed -e "s#%{our_path}##"` ; echo "Running native ld, because cross ld has failed with the following error: " )
 ' > %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld
 chmod +x %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld
 
