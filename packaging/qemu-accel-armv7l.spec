@@ -22,8 +22,7 @@
 
 # Define version of GCC used as cross compiler
 %define gcc_version 49
-%define gcc_version_dot 4.9 
-
+%define gcc_version_dot 4.9
 Name:           qemu-accel-armv7l
 Version:        0.4
 Release:        0
@@ -187,11 +186,11 @@ ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-%{gcc_version_dot}"
 for compiler in gcc g++
 do
   mv %{buildroot}%{our_path}/usr/bin/${compiler}{,.real}
-  echo '#!/bin/bash
-  if [ "$LIBRARY_PATH" ]; then
-    mv %{our_path}{,.bkp}
+echo '#!/bin/bash
+if [ "$LIBRARY_PATH" ]; then
+  mv %{our_path}{,.bkp}
     exec /usr/bin/qemu-aarch64 /usr/bin/'${compiler}' "$@"
-  fi
+fi
   exec -a /usr/bin/'${compiler}' %{our_path}/usr/bin/'${compiler}'.real "$@" -B%{our_path}/usr/armv7l-tizen-linux-gnueabi/bin -B%{our_path}/%{_libdir}/gcc/armv7l-tizen-linux-gnueabi/%{gcc_version_dot}
   ' > %{buildroot}%{our_path}/usr/bin/${compiler}
   chmod +x %{buildroot}%{our_path}/usr/bin/${compiler}

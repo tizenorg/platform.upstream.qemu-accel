@@ -161,7 +161,7 @@ for executable in \
    /usr/bin/su \
 %endif
    $LD
-do  
+do 
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
 %endif # use_cross_ldso
@@ -179,7 +179,7 @@ done
 
 
 %if %hijack_gcc
-# Install 
+# Install
 mkdir -p %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env}
 cp -a /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz \
       %buildroot%{our_path}/usr/share/icecream-envs
@@ -352,7 +352,7 @@ ln -sf /usr/bin/qemu-arm64-binfmt %buildroot/qemu/qemu-aarch64-binfmt
 
 export NO_BRP_CHECK_RPATH="true"
 
-# Fix variable in baselibs 
+# Fix variable in baselibs
 %if 0%{?use_binfmt_binary}
 sed -e '/use_binfmt_binary/s/.*/\tpost "%%if 1"/' -i %{_sourcedir}/baselibs.conf
 %else
@@ -406,7 +406,7 @@ fi
 builtin echo ':aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff:/qemu/qemu-aarch64:OC' > /proc/sys/fs/binfmt_misc/register
 cat /proc/sys/fs/binfmt_misc/aarch64
 
-if [ $did_mount_it ]; then 
+if [ $did_mount_it ]; then
 builtin echo "Unmounting again.";
 umount /proc/sys/fs/binfmt_misc
 fi
@@ -418,7 +418,7 @@ rm -rf /usr/aarch64-tizen-linux/lib
 ln -s /lib /usr/aarch64-tizen-linux/usr/lib
 
 %files
-%defattr(-,root,root)  
+%defattr(-,root,root)
 %if 0%{?use_cross_binaries}
 %if 0%{?hijack_gcc}
 %dir /usr/aarch64-tizen-linux
