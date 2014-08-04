@@ -20,13 +20,17 @@
 # Only select one of the two at a time!
 %define hijack_gcc 1
 
+# Define version of GCC used as cross compiler
+%define gcc_version 49
+%define gcc_version_dot 4.9 
+
 Name:           qemu-accel-armv7l
 Version:        0.4
 Release:        0
 VCS:            platform/upstream/qemu-accel#submit/tizen/20131025.201555-0-g039eeafa6b52fd126f38fed9cd2fdf36a26a3065
 AutoReqProv:    off
 BuildRequires:  cross-arm-binutils
-BuildRequires:  cross-armv7l-gcc48-icecream-backend
+BuildRequires:  cross-armv7l-gcc%{gcc_version}-icecream-backend
 #BuildRequires:  expect
 BuildRequires:  fdupes
 BuildRequires:  glibc-locale
@@ -49,9 +53,9 @@ ExclusiveArch:  x86_64 %ix86
 %define HOST_ARCH %(echo %{_host_cpu} | sed -e "s/i.86/i586/;s/ppc/powerpc/;s/sparc64.*/sparc64/;s/sparcv.*/sparc/;")
 %define our_path /emul/%{HOST_ARCH}-for-arm
 %ifarch %ix86
-%define icecream_cross_env cross-armv7l-gcc48-icecream-backend_i386
+%define icecream_cross_env cross-armv7l-gcc%{gcc_version}-icecream-backend_i386
 %else
-%define icecream_cross_env cross-armv7l-gcc48-icecream-backend_x86_64
+%define icecream_cross_env cross-armv7l-gcc%{gcc_version}-icecream-backend_x86_64
 %endif
 
 %description
@@ -97,7 +101,7 @@ done
 %if %hijack_gcc
 # extract cross-compiler
 mkdir -p cross-compiler-tmp
-for executable in $(tar -C cross-compiler-tmp -xvzf /usr/share/icecream-envs/cross-armv7l-gcc48-icecream-backend_*.tar.gz); do
+for executable in $(tar -C cross-compiler-tmp -xvzf /usr/share/icecream-envs/cross-armv7l-gcc%{gcc_version}-icecream-backend_*.tar.gz); do
     if [ ! -d "cross-compiler-tmp/$executable" ]; then
         binaries="$binaries cross-compiler-tmp/$executable"
     fi
@@ -111,7 +115,7 @@ mkdir -p %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env}
 cp -a /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz \
       %buildroot%{our_path}/usr/share/icecream-envs
 # And extract it for direct usage
-tar xvz -C %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env} -f /usr/share/icecream-envs/cross-armv7l-gcc48-icecream-backend_*.tar.gz
+tar xvz -C %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env} -f /usr/share/icecream-envs/cross-armv7l-gcc%{gcc_version}-icecream-backend_*.tar.gz
 # It needs a tmp working directory which is writable
 install -d -m0755 %buildroot%{our_path}/usr/share/icecream-envs
 %endif
@@ -174,21 +178,24 @@ ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
 ln -sf g++ "%{buildroot}%{our_path}/usr/bin/c++"
 # gcc can also be called cc
 ln -sf gcc "%{buildroot}%{our_path}/usr/bin/cc"
-# gcc can also be called gcc-4.8
-ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-4.8"
+# gcc can also be called gcc-%{gcc_version_dot}
+ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-%{gcc_version_dot}"
 
 # nasty hack: If LIBRARY_PATH is set, native gcc adds the contents to its
 #             library search list, but cross gcc does not. So switch to all
 #             native in these situations.
-mv %{buildroot}%{our_path}/usr/bin/gcc{,.real}
-echo '#!/bin/bash
-if [ "$LIBRARY_PATH" ]; then
-  mv %{our_path}{,.bkp}
-  exec /usr/bin/qemu-arm /usr/bin/gcc "$@"
-fi
-exec -a /usr/bin/gcc %{our_path}/usr/bin/gcc.real "$@"
-' > %{buildroot}%{our_path}/usr/bin/gcc
-chmod +x %{buildroot}%{our_path}/usr/bin/gcc
+for compiler in gcc g++
+do
+  mv %{buildroot}%{our_path}/usr/bin/${compiler}{,.real}
+  echo '#!/bin/bash
+  if [ "$LIBRARY_PATH" ]; then
+    mv %{our_path}{,.bkp}
+    exec /usr/bin/qemu-aarch64 /usr/bin/'${compiler}' "$@"
+  fi
+  exec -a /usr/bin/'${compiler}' %{our_path}/usr/bin/'${compiler}'.real "$@" -B%{our_path}/usr/armv7l-tizen-linux-gnueabi/bin -B%{our_path}/%{_libdir}/gcc/armv7l-tizen-linux-gnueabi/%{gcc_version_dot}
+  ' > %{buildroot}%{our_path}/usr/bin/${compiler}
+  chmod +x %{buildroot}%{our_path}/usr/bin/${compiler}
+done
 #
 # as is not writing right EABI ELF header inside of arm environment for unknown reason
 #
@@ -219,7 +226,7 @@ if [ -n "$LD_LIBRARY_PATH" ]; then
       args=(${args[@]} "$i")
     fi
   done
-  exec /usr/bin/qemu-arm /usr/bin/ld "${args[@]}"
+  exec /usr/bin/qemu-arm /usr/bin/ld `echo "${args[@]}" | sed -e "s#%{our_path}##"`
 fi
 for i in "$@"; do
   if [ "${i:0:10}" = "--sysroot=" ]; then
@@ -227,7 +234,7 @@ for i in "$@"; do
   fi
 done
 
-exec -a "$0" %{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld.real --sysroot=/ "$@"
+%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld.real --sysroot=/ "$@" || ( /usr/bin/qemu-arm /usr/armv7l-tizen-linux-gnueabi/bin/ld -L/usr/lib/gcc/armv7l-tizen-linux-gnueabi/4.9/ `echo "$@" | sed -e "s#%{our_path}##"` ; echo "Running native ld, because cross ld has failed with the following error: " )
 ' > %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld
 chmod +x %{buildroot}%{our_path}/usr/arm-tizen-linux-gnueabi/bin/ld
 
