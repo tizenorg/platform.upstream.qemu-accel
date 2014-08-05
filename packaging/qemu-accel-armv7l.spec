@@ -20,9 +20,13 @@
 # Only select one of the two at a time!
 %define hijack_gcc 1
 
-# Define version of GCC used as cross compiler
+# Check whether macro "gcc_version" was defined via project config
+%if 0%{?gcc_version}
+%else
+# If the macro was undefined, set it to this default value:
 %define gcc_version 49
-%define gcc_version_dot 4.9
+%endif
+%{expand:%%define gcc_version_dot %(echo "%{gcc_version}" | sed -e "s/\([0-9]\)\([0-9]\)/\1.\2/g")}
 Name:           qemu-accel-armv7l
 Version:        0.4
 Release:        0
