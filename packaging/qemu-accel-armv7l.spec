@@ -193,7 +193,7 @@ do
 echo '#!/bin/bash
 if [ "$LIBRARY_PATH" ]; then
   mv %{our_path}{,.bkp}
-    exec /usr/bin/qemu-aarch64 /usr/bin/'${compiler}' "$@"
+    exec /usr/bin/qemu-arm /usr/bin/'${compiler}' "$@"
 fi
   exec -a /usr/bin/'${compiler}' %{our_path}/usr/bin/'${compiler}'.real "$@" -B%{our_path}/usr/armv7l-tizen-linux-gnueabi/bin -B%{our_path}/%{_libdir}/gcc/armv7l-tizen-linux-gnueabi/%{gcc_version_dot}
   ' > %{buildroot}%{our_path}/usr/bin/${compiler}
