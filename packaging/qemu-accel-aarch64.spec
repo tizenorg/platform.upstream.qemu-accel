@@ -328,7 +328,7 @@ if [ -n "$LD_LIBRARY_PATH" ]; then
 fi
 for i in "$@"; do
   if [ "${i:0:10}" = "--sysroot=" ]; then
-    exec -a "$0" %{our_path}/usr/aarch64-tizen-linux/bin/ld.real "$@" || /usr/bin/qemu-aarch64 /usr/aarch64-tizen-linux/bin/ld -L/usr/lib/gcc/aarch64-tizen-linux/%{gcc_version_dot}/ `echo "$@" | sed -e "s#%{our_path}##;s#--sysroot=[^[:space:]]\+# #g"`
+    %{our_path}/usr/aarch64-tizen-linux/bin/ld.real "$@" || /usr/bin/qemu-aarch64 /usr/aarch64-tizen-linux/bin/ld -L/usr/lib/gcc/aarch64-tizen-linux/%{gcc_version_dot}/ `echo "$@" | sed -e "s#%{our_path}##;s#--sysroot=[^[:space:]]\+# #g"`
   fi
 done
 
