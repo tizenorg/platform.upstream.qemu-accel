@@ -1,0 +1,7 @@
+Code-Review+2: Ilya Palachev <i.palachev@samsung.com>
+Verified+1: Ilya Palachev <i.palachev@samsung.com>
+Submitted-by: Ilya Palachev <i.palachev@samsung.com>
+Submitted-at: Mon, 11 Aug 2014 03:30:09 -0700
+Reviewed-on: https://review.tizen.org/gerrit/25862
+Project: platform/upstream/qemu-accel
+Branch: refs/heads/sandbox/ipalachev/tizen
