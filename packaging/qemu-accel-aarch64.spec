@@ -329,6 +329,7 @@ fi
 for i in "$@"; do
   if [ "${i:0:10}" = "--sysroot=" ]; then
     %{our_path}/usr/aarch64-tizen-linux/bin/ld.real "$@" || /usr/bin/qemu-aarch64 /usr/aarch64-tizen-linux/bin/ld -L/usr/lib/gcc/aarch64-tizen-linux/%{gcc_version_dot}/ `echo "$@" | sed -e "s#%{our_path}##;s#--sysroot=[^[:space:]]\+# #g"`
+    exit $?
   fi
 done
 
