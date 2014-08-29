@@ -26,7 +26,7 @@
 # If the macro was undefined, set it to this default value:
 %define gcc_version 49
 %endif
-%{expand:%%define gcc_version_dot %(echo "%{gcc_version}" | sed -e "s/\([0-9]\)\([0-9]\)/\1.\2/g")}
+%{expand:%%define gcc_version_dot %(echo -n "%{gcc_version}" | sed -e "s/\([0-9]\)\([0-9]\)/\1.\2/g")}
 
 Name:           qemu-accel-armv7l
 Version:        0.4
@@ -54,7 +54,7 @@ Group:          Development/Libraries/Cross
 ExclusiveArch:  x86_64 %ix86
 
 # default path in qemu
-%define HOST_ARCH %(echo %{_host_cpu} | sed -e "s/i.86/i586/;s/ppc/powerpc/;s/sparc64.*/sparc64/;s/sparcv.*/sparc/;")
+%define HOST_ARCH %(echo -n "%{_host_cpu}" | sed -e "s/i.86/i586/;s/ppc/powerpc/;s/sparc64.*/sparc64/;s/sparcv.*/sparc/;")
 %define our_path /emul/%{HOST_ARCH}-for-arm
 %ifarch %ix86
 %define icecream_cross_env cross-armv7l-gcc%{gcc_version}-icecream-backend_i386
