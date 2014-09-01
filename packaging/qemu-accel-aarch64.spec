@@ -26,7 +26,7 @@
 
 # Choose which gcc hijack method (if any) to use.
 # Only select one of the two at a time!
-%define hijack_gcc 1
+%define hijack_gcc 0
 
 # Set to 1 if you want to use qemu-aarch64-binfmt, not normal qemu
 %define use_binfmt_binary 1
@@ -46,7 +46,7 @@
 %define use_cross_make 1
 %define use_cross_m4 1
 %define use_cross_patch 1
-%define use_cross_binutils 1
+%define use_cross_binutils 0
 %define use_cross_su 0
 
 %if 0%{!?use_cross_binaries}
