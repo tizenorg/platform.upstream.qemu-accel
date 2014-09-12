@@ -60,7 +60,7 @@ VCS:            platform/upstream/qemu-accel#ca50f86f943b96de45d50929495024471f0
 AutoReqProv:    off
 BuildRequires:  cross-aarch64-binutils
 %if %hijack_gcc
-BuildRequires:  cross-aarch64-gcc%{gcc_version}-icecream-backend
+BuildRequires:  cross-aarch64-gcc%{gcc_version}
 %endif
 #BuildRequires:  expect
 BuildRequires:  fdupes
@@ -222,13 +222,6 @@ do
 done
 
 %if 0%{?use_cross_binaries}
-# make gconv libraries available (needed for msg*)
-%if 0%{?use_cross_gettext_tools}
-%ifarch x86_64
-mkdir -p %{buildroot}/usr/lib64/gconv
-cp -a /usr/lib64/gconv/* "%{buildroot}/usr/lib64/gconv/"
-%endif
-%endif # use_cross_gettext_tools
 
 # create symlinks for bash
 %if 0%{?use_cross_bash}
@@ -440,8 +433,5 @@ ln -s /lib /usr/aarch64-tizen-linux/usr/lib
 /usr/bin/qemu-arm64-binfmt
 /usr/bin/qemu-arm64
 /usr/bin/qemu-aarch64
-%ifarch x86_64
-/usr/lib64
-%endif
 
 %changelog
