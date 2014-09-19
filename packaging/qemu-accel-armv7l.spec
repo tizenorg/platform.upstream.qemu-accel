@@ -31,7 +31,6 @@
 Name:           qemu-accel-armv7l
 Version:        0.4
 Release:        0
-VCS:            platform/upstream/qemu-accel#submit/tizen/20131025.201555-0-g039eeafa6b52fd126f38fed9cd2fdf36a26a3065
 AutoReqProv:    off
 BuildRequires:  cross-arm-binutils
 BuildRequires:  cross-armv7l-gcc%{gcc_version}-icecream-backend
@@ -50,8 +49,9 @@ BuildRequires:  qemu-linux-user
 Requires:       coreutils
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
-Group:          Development/Libraries/Cross
+Group:          Platform Development/Build
 ExclusiveArch:  x86_64 %ix86
+
 
 # default path in qemu
 %define HOST_ARCH %(echo -n "%{_host_cpu}" | sed -e "s/i.86/i586/;s/ppc/powerpc/;s/sparc64.*/sparc64/;s/sparcv.*/sparc/;")
@@ -157,8 +157,8 @@ cp -a /usr/lib64/gconv/* "%{buildroot}/usr/lib64/gconv/"
 %endif
 
 # create symlinks for bash
-#ln -sf ../usr/bin/bash "%{buildroot}%{our_path}/bin/sh"
-#ln -sf ../../bin/bash "%{buildroot}%{our_path}/usr/bin/sh"
+#ln -sf ../usr/bin/bash "%%{buildroot}%%{our_path}/bin/sh"
+#ln -sf ../../bin/bash "%%{buildroot}%%{our_path}/usr/bin/sh"
 
 # binutils needs to be exposed in /usr/bin
 for i in ar ld ld.bfd objcopy objdump; do
@@ -182,7 +182,7 @@ ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
 ln -sf g++ "%{buildroot}%{our_path}/usr/bin/c++"
 # gcc can also be called cc
 ln -sf gcc "%{buildroot}%{our_path}/usr/bin/cc"
-# gcc can also be called gcc-%{gcc_version_dot}
+# gcc can also be called gcc-%%{gcc_version_dot}
 ln -sf gcc "%{buildroot}%{our_path}/usr/bin/gcc-%{gcc_version_dot}"
 
 # nasty hack: If LIBRARY_PATH is set, native gcc adds the contents to its
@@ -253,8 +253,6 @@ ln -sf ../include %{buildroot}/usr/armv7l-tizen-linux-gnueabi/include
 mkdir %buildroot/qemu
 cp -L /usr/bin/qemu-arm{,-binfmt} %buildroot/qemu/
 
-%fdupes -s %{buildroot}
-
 export NO_BRP_CHECK_RPATH="true"
 
 # Install glibc-locale, otherwise msgmerge >= 0.18.3 fails
@@ -270,6 +268,12 @@ chmod 755 %{buildroot}%{our_path}/usr/lib/{gconv,locale}
 cp -R /usr/share/locale %{buildroot}%{our_path}/usr/share
 # Fix permissions for abuild
 chmod 755 %{buildroot}%{our_path}/usr/share/locale
+
+%find_lang gettext-runtime
+%find_lang gettext-tools
+%find_lang libc
+
+%fdupes -s %{buildroot}
 
 %post
 set -x
@@ -314,7 +318,9 @@ builtin echo "All done"
 rm -rf /usr/armv7l-tizen-linux-gnueabi/lib
 ln -s /lib /usr/armv7l-tizen-linux-gnueabi/usr/lib
 
-%files
+ldconfig
+
+%files -f gettext-runtime.lang -f gettext-tools.lang -f libc.lang
 %defattr(-,root,root)
 %dir /usr/armv7l-tizen-linux-gnueabi
 /usr/armv7l-tizen-linux-gnueabi/usr
@@ -322,7 +328,7 @@ ln -s /lib /usr/armv7l-tizen-linux-gnueabi/usr/lib
 /emul
 /qemu
 %ifarch x86_64
-/usr/lib64
+/usr/lib64/*
 %endif
 
 %changelog
