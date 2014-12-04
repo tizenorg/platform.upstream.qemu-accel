@@ -1,0 +1,8 @@
+Code-Review+1: Stéphane Desneux (sdx) <stephane.desneux@open.eurogiciel.org>
+Code-Review+2: yooduck seo <yooduck.seo@samsung.com>
+Verified+1: yooduck seo <yooduck.seo@samsung.com>
+Submitted-by: Markus Lehtonen <markus.lehtonen@linux.intel.com>
+Submitted-at: Wed, 03 Dec 2014 21:02:20 -0800
+Reviewed-on: https://review.tizen.org/gerrit/31284
+Project: platform/upstream/qemu-accel
+Branch: refs/heads/tizen
