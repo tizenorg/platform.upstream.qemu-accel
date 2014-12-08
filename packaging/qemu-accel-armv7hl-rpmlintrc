@@ -1,6 +1,0 @@
-addFilter("library-without-ldconfig-postin")
-addFilter("library-without-ldconfig-postun")
-addFilter("unstripped-binary-or-object")
-addFilter("shared-lib-calls-exit")
-addFilter("permissions-world-writable")
-addFilter("arch-dependent-file-in-usr-share")
