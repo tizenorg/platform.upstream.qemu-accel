@@ -15,11 +15,11 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-%define emulated_arch_long aarch64
-%define emulated_arch_short aarch64
-%define emulated_arch_synonim arm64
-%define emulated_arch_triple_long %{emulated_arch_long}-tizen-linux
-%define emulated_arch_triple_short %{emulated_arch_long}-tizen-linux
+%define emulated_arch_long EMULATED_ARCH_LONG
+%define emulated_arch_short EMULATED_ARCH_SHORT
+%define emulated_arch_synonim EMULATED_ARCH_SYNONIM
+%define emulated_arch_triple_long EMULATED_ARCH_TRIPLE_LONG
+%define emulated_arch_triple_short EMULATED_ARCH_TRIPLE_LONG
 
 # Check whether macro "gcc_version" was defined via project config
 %if 0%{?gcc_version}
