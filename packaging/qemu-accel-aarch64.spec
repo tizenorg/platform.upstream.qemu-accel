@@ -136,7 +136,7 @@ for executable in \
    /usr/bin/{tar,gzip,bzip2,xz,xzdec} \
 %endif # use_cross_archivators
 %if 0%{?use_cross_stream_editors}
-   /usr/bin/{grep,egrep,sed} \
+   /usr/bin/{grep,sed} \
 %endif # use_cross_stream_editors
 %if 0%{use_cross_nss}
 %ifarch %ix86

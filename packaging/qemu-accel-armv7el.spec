@@ -81,14 +81,14 @@ binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2" # loaded via dlopen by g
 #     /opt/testing/bin/python: error while loading shared libraries: libpython2.7.so.1.0: wrong ELF class: ELFCLASS32
 
 for executable in $LD \
-   /bin/{bash,grep,egrep,gzip,sed,tar,rpm} \
+   /bin/{bash,grep,gzip,sed,tar,rpm} \
    /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /lib64/libfreebl3.so \
    /usr/bin/{bzip2,cat,expr,make,m4,mkdir,msgexec,msgfmt,msgcat,msgmerge,mv,patch,rm,rmdir,rpmbuild,xz,xzdec} \
 %if %use_icecream
    /usr/sbin/iceccd /usr/bin/icecc /usr/bin/schroot \
 %endif
    /usr/arm-tizen-linux-gnueabi/bin/{as,ar,ld,ld.bfd,objcopy,objdump}
-do  
+do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
 
@@ -120,11 +120,11 @@ mkdir -p %buildroot/%_lib/security
 # as soon as we have lib64 in arm, we're doomed :)
 cp /lib64/security/pam_permit.so %buildroot/%_lib/security
 mkdir -p %buildroot/etc/pam.d/
-for i in auth session account password session; do 
+for i in auth session account password session; do
   echo "$i    optional  pam_permit.so" >> %buildroot/etc/pam.d/schroot
 done
 
-# Install 
+# Install
 mkdir -p %buildroot/usr/share/icecream-envs/%{icecream_cross_env}
 pushd %buildroot/usr/share/icecream-envs/%{icecream_cross_env}
 tar xvf /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz
@@ -139,15 +139,15 @@ echo "#export ICECC_DEBUG=debug"           >> %{buildroot}/etc/profile.d/icecrea
 echo 'export PATH=/opt/icecream/bin:$PATH' >> %{buildroot}/etc/profile.d/icecream.sh
 
 mkdir -p %{buildroot}/etc/schroot
-( 
-echo "[cross]" 
-echo "directory=/usr/share/icecream-envs/%{icecream_cross_env}" 
+(
+echo "[cross]"
+echo "directory=/usr/share/icecream-envs/%{icecream_cross_env}"
 echo "users=abuild"
 ) > %{buildroot}/etc/schroot/schroot.conf
 %endif
 
 %if %hijack_gcc
-# Install 
+# Install
 mkdir -p %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env}
 cp -a /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz \
       %buildroot%{our_path}/usr/share/icecream-envs
@@ -320,7 +320,7 @@ if [ -e /proc/sys/fs/binfmt_misc/arm ]; then
     builtin echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/qemu/qemu-arm-binfmt:P' > /proc/sys/fs/binfmt_misc/register
 fi
 
-if [ $did_mount_it ]; then 
+if [ $did_mount_it ]; then
   builtin echo "Unmounting again.";
   umount /proc/sys/fs/binfmt_misc
 fi
@@ -332,7 +332,7 @@ rm -rf /usr/armv7el-tizen-linux-gnueabi/lib
 ln -s /lib /usr/armv7el-tizen-linux-gnueabi/lib
 
 %files
-%defattr(-,root,root)  
+%defattr(-,root,root)
 %if %use_icecream
 /etc/profile.d
 /etc/pam.d

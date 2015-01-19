@@ -90,7 +90,7 @@ binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2 %{_libdir}/rpm-plugins/ms
 
 for executable in $LD \
    /usr/bin/{bash,rpm,rpmdb} \
-   /usr/bin/{gzip,grep,egrep,sed,tar} \
+   /usr/bin/{gzip,grep,sed,tar} \
 %ifarch %ix86
    /usr/lib/libnssdbm3.so /usr/lib/libsoftokn3.so /lib/libfreebl3.so \
 %else
@@ -98,7 +98,7 @@ for executable in $LD \
 %endif
    /usr/bin/{bzip2,cat,expr,make,m4,mkdir,msgexec,msgfmt,msgcat,msgmerge,mv,patch,rm,rmdir,rpmbuild,xz,xzdec} \
    /usr/arm-tizen-linux-gnueabi/bin/{as,ar,ld,ld.bfd,objcopy,objdump}
-do  
+do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
 
@@ -114,7 +114,7 @@ done
 
 
 %if %hijack_gcc
-# Install 
+# Install
 mkdir -p %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env}
 cp -a /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz \
       %buildroot%{our_path}/usr/share/icecream-envs

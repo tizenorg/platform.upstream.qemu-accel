@@ -77,11 +77,11 @@ binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2 %{_libdir}/rpm-plugins/ms
 
 for executable in $LD \
    /usr/bin/{bash,rpm,rpmdb} \
-   /usr/bin/{gzip,grep,egrep,sed,tar} \
+   /usr/bin/{gzip,grep,sed,tar} \
    /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /lib64/libfreebl3.so \
    /usr/bin/{bzip2,cat,expr,make,m4,mkdir,msgexec,msgfmt,msgcat,msgmerge,mv,patch,rm,rmdir,rpmbuild,xz,xzdec} \
    /usr/arm-tizen-linux-gnueabi/bin/{as,ar,ld,ld.bfd,objcopy,objdump}
-do  
+do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
 
@@ -97,7 +97,7 @@ done
 
 
 %if %hijack_gcc
-# Install 
+# Install
 mkdir -p %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env}
 cp -a /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz \
       %buildroot%{our_path}/usr/share/icecream-envs
@@ -265,7 +265,7 @@ if [ -e /proc/sys/fs/binfmt_misc/arm ]; then
     builtin echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/qemu/qemu-arm-binfmt:P' > /proc/sys/fs/binfmt_misc/register
 fi
 
-if [ $did_mount_it ]; then 
+if [ $did_mount_it ]; then
   builtin echo "Unmounting again.";
   umount /proc/sys/fs/binfmt_misc
 fi
@@ -277,7 +277,7 @@ rm -rf /usr/armv7hl-tizen-linux-gnueabi/lib
 ln -s /lib /usr/armv7hl-tizen-linux-gnueabi/usr/lib
 
 %files
-%defattr(-,root,root)  
+%defattr(-,root,root)
 %dir /usr/armv7hl-tizen-linux-gnueabi
 /usr/armv7hl-tizen-linux-gnueabi/usr
 /emul
