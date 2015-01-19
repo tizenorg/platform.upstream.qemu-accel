@@ -59,7 +59,7 @@ binaries="/%_lib/libnsl.so.1 /%_lib/libnss_compat.so.2" # loaded via dlopen by g
 
 for executable in $LD \
    /usr/bin/{bash,rpm} \
-   /usr/bin/{gzip,grep,egrep,sed,tar} \
+   /usr/bin/{gzip,grep,sed,tar} \
    /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /usr/lib64/libfreebl3.so \
    /usr/bin/{bzip2,cat,expr,make,m4,mkdir,msgexec,msgfmt,msgcat,msgmerge,mv,patch,rm,rmdir,rpmbuild,xz,xzdec} \
    /usr/arm-tizen-linux-gnueabi/bin/{as,ar,ld,ld.bfd,objcopy,objdump}
