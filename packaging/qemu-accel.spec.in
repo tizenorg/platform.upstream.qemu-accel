@@ -15,12 +15,11 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-
-%define emulated_arch_long armv7l
-%define emulated_arch_short arm
-%define emulated_arch_synonim arm
-%define emulated_arch_triple_short %{emulated_arch_short}-tizen-linux-gnueabi
-%define emulated_arch_triple_long %{emulated_arch_long}-tizen-linux-gnueabi
+%define emulated_arch_long EMULATED_ARCH_LONG
+%define emulated_arch_short EMULATED_ARCH_SHORT
+%define emulated_arch_synonim EMULATED_ARCH_SYNONIM
+%define emulated_arch_triple_short EMULATED_ARCH_TRIPLE_SHORT
+%define emulated_arch_triple_long EMULATED_ARCH_TRIPLE_LONG
 
 # Check whether macro "gcc_version" was defined via project config
 %if 0%{?gcc_version}
@@ -80,7 +79,7 @@ ExclusiveArch:  x86_64 %ix86
 %description
 This package is used in %{emulated_arch_long} architecture builds using qemu to speed up builds
 with native binaries.
- This should not be installed on systems, it is just intended for qemu environments.
+This should not be installed on systems, it is just intended for qemu environments.
 
 %prep
 
@@ -122,7 +121,7 @@ for executable in $LD \
    /usr/bin/%{emulated_arch_triple_short}-{%{binaries_binutils_comma}} \
    /usr/bin/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
    /usr/bin/xsltproc
-do  
+do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
 
@@ -130,7 +129,7 @@ done
 # extract cross-compiler
 mkdir -p cross-compiler-tmp
 for executable in $(tar -C cross-compiler-tmp -xvzf /usr/share/icecream-envs/cross-%{emulated_arch_long}-gcc%{gcc_version}-icecream-backend_*.tar.gz); do
-    if [ ! -d "cross-compiler-tmp/$executable" ]; then
+    if [ ! -d "cross-compiler-tmp/$executable" ] ; then
         binaries="$binaries cross-compiler-tmp/$executable"
     fi
 done
@@ -138,7 +137,7 @@ done
 
 
 %if %hijack_gcc
-# Install 
+# Install
 mkdir -p %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env}
 cp -a /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz \
       %buildroot%{our_path}/usr/share/icecream-envs
@@ -205,6 +204,7 @@ ln -sf ../lib/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
 %else
 ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
 %endif
+
 # Enable wrapper for GCC compiler:
 mv %{buildroot}%{our_path}/usr/bin/gcc{,.real}
 mv %{buildroot}%{our_path}/usr/bin/g++{,.real}
@@ -223,6 +223,7 @@ ln -sf g++.real "%{buildroot}%{our_path}/usr/bin/c++.real"
 # gcc can also be called cc
 ln -sf gcc.real "%{buildroot}%{our_path}/usr/bin/cc.real"
 
+
 # allow abuild to do the mv
 chmod 755 %{buildroot}/emul
 
@@ -234,6 +235,7 @@ for LD_NAME in ld ld.gold ; do
   mv %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/${LD_NAME}{,.real}
   ln -s ld-wrapper.sh %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/${LD_NAME}
 done
+
 # Write config that will be used by wrappers at run-time.
 echo '
 QEMU_NAME=/usr/bin/qemu-%{emulated_arch_synonim}
@@ -257,7 +259,6 @@ echo '#!/bin/bash
 exec -a /usr/bin/as %{our_path}/usr/bin/as.real -meabi=5 "$@"
 ' > %{buildroot}%{our_path}/usr/bin/as
 chmod +x %{buildroot}%{our_path}/usr/bin/as
-
 %endif
 
 # To support gcc sysroot
@@ -276,6 +277,7 @@ if [[ %{emulated_arch_short} != %{emulated_arch_synonim} ]] ; then
   ln -sf /qemu/qemu-%{emulated_arch_short}-binfmt %buildroot/qemu/qemu-%{emulated_arch_synonim}-binfmt
 fi
 
+
 export NO_BRP_CHECK_RPATH="true"
 
 rm -rf %{buildroot}/%{our_path}/bin
@@ -290,7 +292,6 @@ ln -s %{our_path}/usr/bin/rpm %{buildroot}/%{our_path}/usr/bin/rpmverify
 ldconfig
 
 %postun
-
 ldconfig
 
 %files
