@@ -93,7 +93,14 @@ This should not be installed on systems, it is just intended for qemu environmen
 %build
 
 %install
-binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2 %{_libdir}/rpm-plugins/msm.so" # loaded via dlopen by glibc
+binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
+rpm_plugin_msm="%{_libdir}/rpm-plugins/msm.so"
+if [ -f "$rpm_plugin_msm" ]; then
+  binaries="$binaries $rpm_plugin_msm";
+else
+  rpm_plugin_msm=
+fi
+
 %ifarch %ix86
   LD="/lib/ld-linux.so.2"
 %else
@@ -111,7 +118,8 @@ binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2 %{_libdir}/rpm-pl
 for executable in $LD \
    /usr/bin/bash \
    /usr/bin/{rpm,rpm2cpio,rpmdb,rpmkeys,rpmqpack,rpmbuild,rpmsign,rpmspec} \
-   %{_libdir}/rpm-plugins/{exec.so,msm.so} \
+   %{_libdir}/rpm-plugins/exec.so \
+   "$rpm_plugin_msm" \
    %{_libdir}/{libdb-4.8.so,libdb_cxx-4.8.so} \
    /usr/bin/{tar,gzip,bzip2,xz,xzdec} \
    /usr/bin/{grep,sed} \
