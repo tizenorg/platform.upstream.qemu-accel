@@ -159,7 +159,8 @@ install -d -m0755 %buildroot%{our_path}/usr/share/icecream-envs
 for binary in $binaries
 do
   outfile=%buildroot%{our_path}$(echo $binary | sed 's:cross-compiler-tmp::;s:/opt/cross/%{emulated_arch_triple_long}:/usr:')
-  [ -f $outfile ] && continue
+  [ ! -e $binary ] && echo "WARNING: File '${binary}' not found, ignoring" && continue
+  [ -f $outfile ] && echo "WARNING: File '${outfile}' exists, ignoring" && continue
   mkdir -p ${outfile%/*}
   cp -aL $binary $outfile
   objdump -s -j .rodata -j .data $outfile | sed 's/^ *\([a-z0-9]*\)/\1:/' | \
