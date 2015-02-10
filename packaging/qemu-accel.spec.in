@@ -137,7 +137,8 @@ echo ""
 for binary in $binaries
 do
   outfile=%{buildroot}/%{our_path}/$binary
-  [ -f $outfile ] && continue
+  [ ! -e $binary ] && echo "WARNING: File '${binary}' not found, ignoring" && continue
+  [ -f $outfile ] && echo "WARNING: File '${outfile}' exists, ignoring" && continue
   mkdir -p ${outfile%/*}
   cp -aL $binary $outfile
   objdump -s -j .rodata -j .data $outfile | sed 's/^ *\([a-z0-9]*\)/\1:/' | \
