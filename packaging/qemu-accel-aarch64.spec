@@ -146,6 +146,9 @@ for executable in $(tar -C cross-compiler-tmp -xvzf /usr/share/icecream-envs/cro
 done
 %endif
 
+for libasan in %{_libdir}/libasan.so* ; do
+    binaries="$binaries $libasan"
+done
 
 %if %hijack_gcc
 # Install
