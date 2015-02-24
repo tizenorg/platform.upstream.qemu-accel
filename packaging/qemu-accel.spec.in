@@ -59,6 +59,8 @@ BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
 Requires:       coreutils
+Requires(post): update-alternatives
+Requires(postun): update-alternatives
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
@@ -75,6 +77,11 @@ ExclusiveArch:  x86_64 %ix86
 %endif
 %define binaries_binutils addr2line ar as elfedit gprof ld ld.bfd ld.gold nm objcopy objdump ranlib readelf size strings strip
 %define binaries_binutils_comma %(echo %{binaries_binutils} | sed -e "s/ /,/g")
+
+%define bfd_plugin_dir      %{_bindir}/../lib/bfd-plugins
+%define bfd_plugin_lto_name liblto_plugin_%{_arch}.so
+%define bfd_plugin_lto      %{bfd_plugin_dir}/%{bfd_plugin_lto_name}
+%define gcc_plugin_lto %{our_path}%{_libdir}/gcc/%{emulated_arch_triple_long}/%{gcc_version_dot}/liblto_plugin.so
 
 %description
 This package is used in %{emulated_arch_long} architecture builds using qemu to speed up builds
@@ -288,11 +295,17 @@ ln -s %{our_path}/usr/sbin %{buildroot}/%{our_path}/sbin
 ln -s %{our_path}/usr/bin/rpm %{buildroot}/%{our_path}/usr/bin/rpmquery
 ln -s %{our_path}/usr/bin/rpm %{buildroot}/%{our_path}/usr/bin/rpmverify
 
+mkdir -p "%{buildroot}%{bfd_plugin_dir}"
+touch "%{buildroot}%{bfd_plugin_lto}"
+
 %post
 ldconfig
+"%_sbindir/update-alternatives" --install \
+    "%{bfd_plugin_lto}" "%{bfd_plugin_lto_name}" "%{gcc_plugin_lto}" 3
 
 %postun
 ldconfig
+"%_sbindir/update-alternatives" --remove %{bfd_plugin_lto_name} "%{gcc_plugin_lto}"
 
 %files
 %defattr(-,root,root)
@@ -301,5 +314,6 @@ ldconfig
 /usr/%{emulated_arch_triple_long}/include
 /emul
 /qemu
+%ghost %{bfd_plugin_lto}
 
 %changelog
