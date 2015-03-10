@@ -58,6 +58,7 @@ BuildRequires:  rpmlint-mini
 BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
+BuildRequires:	cmake
 Requires:       coreutils
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
@@ -120,7 +121,8 @@ for executable in $LD \
    /usr/bin/patch \
    /usr/bin/%{emulated_arch_triple_short}-{%{binaries_binutils_comma}} \
    /usr/bin/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
-   /usr/bin/xsltproc
+   /usr/bin/xsltproc \
+   /usr/bin/{ccmake,cmake,cpack,ctest}
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
