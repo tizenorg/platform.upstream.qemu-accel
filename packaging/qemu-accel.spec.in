@@ -120,7 +120,9 @@ for executable in $LD \
    /usr/bin/patch \
    /usr/bin/%{emulated_arch_triple_short}-{%{binaries_binutils_comma}} \
    /usr/bin/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
-   /usr/bin/xsltproc
+   /usr/bin/xsltproc \
+   /usr/bin/pkg-config \
+   /usr/bin/file
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
