@@ -31,7 +31,11 @@
 
 # Choose which gcc hijack method (if any) to use.
 # Only select one of the two at a time!
+%if 0%build_crt
+%define hijack_gcc 0
+%else
 %define hijack_gcc 1
+%endif
 
 
 Name:           qemu-accel-%{emulated_arch_long}
@@ -59,6 +63,9 @@ BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
 BuildRequires:	cmake
+%if 0%build_crt
+BuildRequires: clang
+%endif
 Requires:       coreutils
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
@@ -131,6 +138,10 @@ for executable in $LD \
    /usr/bin/xsltproc \
    /usr/bin/{ccmake,cmake,cpack,ctest} \
    /usr/bin/pkg-config \
+%if 0%build_crt
+   /usr/bin/clang \
+   /usr/bin/clang++ \
+%endif
    /usr/bin/file
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
@@ -199,7 +210,7 @@ for i in %{binaries_binutils} ; do
       rm %{buildroot}%{our_path}/%{_bindir}/$i
     fi
     ln -s ../%{emulated_arch_triple_short}/bin/$i %{buildroot}%{our_path}/%{_bindir}/$i
-    ln -s ../%{emulated_arch_triple_short}/bin/$i %{buildroot}%{our_path}/%{_bindir}/%{emulated_arch_triple_short}-$i
+#    ln -s ../%{emulated_arch_triple_short}/bin/$i %{buildroot}%{our_path}/%{_bindir}/%{emulated_arch_triple_short}-$i
   fi
 done
 pushd %{buildroot}%{our_path} &&  ln -s usr/bin && popd
@@ -279,6 +290,56 @@ ln -sf .. %{buildroot}/usr/%{emulated_arch_triple_long}/usr
 ln -sf ../include %{buildroot}/usr/%{emulated_arch_triple_long}/include
 %endif
 
+%if 0%build_crt
+# make cross ld work with emulated compilers
+cp %{SOURCE0} %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/ld-wrapper.sh
+sed -i -e "s|wrapper-config.sh|%{our_path}/usr/bin/wrapper-config.sh|" %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/ld-wrapper.sh
+
+for LD_NAME in ld ld.gold ; do
+  mv %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/${LD_NAME}{,.real}
+  ln -s ld-wrapper.sh %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/${LD_NAME}
+done
+
+# Write config that will be used by wrappers at run-time.
+echo '
+QEMU_NAME=/usr/bin/qemu-%{emulated_arch_synonim}
+CROSS_ACCELERATION_DIRECTORY=%{our_path}
+GCC_LIBEXEC_DIRECTORY=%{_libdir}/gcc/%{emulated_arch_triple_long}/%{gcc_version_dot}
+CROSS_BIN_PREFIX=/usr/%{emulated_arch_triple_short}/bin
+NATIVE_BIN_PREFIX=/usr/%{emulated_arch_triple_long}/bin
+' > %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/wrapper-config.sh
+ln -s %{our_path}/usr/%{emulated_arch_triple_short}/bin/wrapper-config.sh %{buildroot}%{our_path}/usr/bin/wrapper-config.sh
+
+chmod 755 %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/ld-wrapper.sh
+
+%if "%{emulated_arch_short}" == "arm"
+#
+# as is not writing right EABI ELF header inside of arm environment for unknown
+# reason.
+# TODO: Still the case (2014-12-11).
+#
+mv %{buildroot}%{our_path}/usr/bin/as{,.real}
+echo '#!/bin/bash
+exec -a /usr/bin/as %{our_path}/usr/bin/as.real -meabi=5 "$@"
+' > %{buildroot}%{our_path}/usr/bin/as
+chmod +x %{buildroot}%{our_path}/usr/bin/as
+%endif
+
+#create symlinks to clang
+ln -s clang %{buildroot}%{our_path}/usr/bin/gcc
+ln -s clang++ %{buildroot}%{our_path}/usr/bin/g++
+mv %{buildroot}%{our_path}/usr/bin/clang %{buildroot}%{our_path}/usr/bin/clang.real
+mv %{buildroot}%{our_path}/usr/bin/clang++ %{buildroot}%{our_path}/usr/bin/clang++.real
+echo '#!/bin/bash
+exec %{our_path}/usr/bin/clang.real --target=%{emulated_arch_triple_long} -I/usr/lib/clang/3.6.1/include $@
+' > %{buildroot}%{our_path}/usr/bin/clang
+echo '#!/bin/bash
+exec %{our_path}/usr/bin/clang++.real --target=%{emulated_arch_triple_long} -I/usr/lib/clang/3.6.1/include $@
+' > %{buildroot}%{our_path}/usr/bin/clang++
+chmod +x %{buildroot}%{our_path}/usr/bin/clang
+chmod +x %{buildroot}%{our_path}/usr/bin/clang++
+%endif
+
 # Make QEMU available through /qemu
 mkdir %buildroot/qemu
 cp -L /usr/bin/qemu-%{emulated_arch_short}{,-binfmt} %buildroot/qemu/
@@ -314,9 +375,11 @@ ldconfig
 
 %files
 %defattr(-,root,root)
+%if %hijack_gcc
 %dir /usr/%{emulated_arch_triple_long}
 /usr/%{emulated_arch_triple_long}/usr
 /usr/%{emulated_arch_triple_long}/include
+%endif
 /emul
 /qemu
 %ghost %{bfd_plugin_lto}
