@@ -58,6 +58,7 @@ BuildRequires:  rpmlint-mini
 BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
+BuildRequires:	rpm-security-plugin
 Requires:       coreutils
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
