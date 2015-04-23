@@ -25,7 +25,7 @@
 %if 0%{?gcc_version}
 %else
 # If the macro was undefined, set it to this default value:
-%define gcc_version 49
+%define gcc_version 51
 %endif
 %{expand:%%define gcc_version_dot %(echo -n "%{gcc_version}" | sed -e "s/\([0-9]\)\([0-9]\)/\1.\2/g")}
 
