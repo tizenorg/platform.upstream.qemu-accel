@@ -54,7 +54,6 @@ BuildRequires:  m4
 # required for xxd
 BuildRequires:  vim
 BuildRequires:  patchelf
-BuildRequires:  rpmlint-mini
 BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
