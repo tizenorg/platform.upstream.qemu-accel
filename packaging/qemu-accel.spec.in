@@ -120,7 +120,7 @@ for executable in $LD \
 %else
    /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /lib64/libfreebl3.so \
 %endif
-   /usr/bin/{cat,expr,mkdir,mv,rm,rmdir} \
+   /usr/bin/{ls,cat,expr,mkdir,mv,rm,rmdir} \
    /usr/bin/{msgexec,msgfmt,msgcat,msgmerge} \
    /usr/bin/make \
    /usr/bin/m4 \
