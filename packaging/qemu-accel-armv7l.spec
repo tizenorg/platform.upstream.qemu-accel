@@ -331,10 +331,10 @@ ln -s clang++ %{buildroot}%{our_path}/usr/bin/g++
 mv %{buildroot}%{our_path}/usr/bin/clang %{buildroot}%{our_path}/usr/bin/clang.real
 mv %{buildroot}%{our_path}/usr/bin/clang++ %{buildroot}%{our_path}/usr/bin/clang++.real
 echo '#!/bin/bash
-exec %{our_path}/usr/bin/clang.real --target=%{emulated_arch_triple_long} -I/usr/lib/clang/3.6.1/include $@
+exec %{our_path}/usr/bin/clang.real --target=%{emulated_arch_triple_long} -I%{_libdir}/clang/3.6.1/include $@
 ' > %{buildroot}%{our_path}/usr/bin/clang
 echo '#!/bin/bash
-exec %{our_path}/usr/bin/clang++.real --target=%{emulated_arch_triple_long} -I/usr/lib/clang/3.6.1/include $@
+exec %{our_path}/usr/bin/clang++.real --target=%{emulated_arch_triple_long} -I/%{_libdir}/clang/3.6.1/include $@
 ' > %{buildroot}%{our_path}/usr/bin/clang++
 chmod +x %{buildroot}%{our_path}/usr/bin/clang
 chmod +x %{buildroot}%{our_path}/usr/bin/clang++
