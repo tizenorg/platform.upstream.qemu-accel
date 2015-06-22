@@ -328,13 +328,14 @@ chmod +x %{buildroot}%{our_path}/usr/bin/as
 #create symlinks to clang
 ln -s clang %{buildroot}%{our_path}/usr/bin/gcc
 ln -s clang++ %{buildroot}%{our_path}/usr/bin/g++
+ln -s %{_libdir}/clang %{buildroot}%{our_path}%{_libdir}/clang
 mv %{buildroot}%{our_path}/usr/bin/clang %{buildroot}%{our_path}/usr/bin/clang.real
 mv %{buildroot}%{our_path}/usr/bin/clang++ %{buildroot}%{our_path}/usr/bin/clang++.real
 echo '#!/bin/bash
-exec %{our_path}/usr/bin/clang.real --target=%{emulated_arch_triple_long} -I%{_libdir}/clang/3.6.1/include $@
+exec %{our_path}/usr/bin/clang.real --target=%{emulated_arch_triple_long} $@
 ' > %{buildroot}%{our_path}/usr/bin/clang
 echo '#!/bin/bash
-exec %{our_path}/usr/bin/clang++.real --target=%{emulated_arch_triple_long} -I/%{_libdir}/clang/3.6.1/include $@
+exec %{our_path}/usr/bin/clang++.real --target=%{emulated_arch_triple_long} $@
 ' > %{buildroot}%{our_path}/usr/bin/clang++
 chmod +x %{buildroot}%{our_path}/usr/bin/clang
 chmod +x %{buildroot}%{our_path}/usr/bin/clang++
