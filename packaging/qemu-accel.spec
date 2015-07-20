@@ -1,6 +1,3 @@
-%define cross armv7l
-%define armv7l 1
-
 #
 # spec file for package qemu-accel-ARCH, where ARCH = armv7l or aarch64
 #

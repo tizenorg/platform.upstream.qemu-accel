@@ -1,18 +1,14 @@
 #!/bin/bash
 
-cp qemu-accel.spec.in qemu-accel-armv7l.spec
-sed -i qemu-accel-armv7l.spec \
-	-e "s/EMULATED_ARCH_LONG/armv7l/g" \
-	-e "s/EMULATED_ARCH_SHORT/arm/g" \
-	-e "s/EMULATED_ARCH_SYNONIM/arm/g" \
-	-e "s/EMULATED_ARCH_TRIPLE_SHORT/\%\{emulated_arch_short\}-tizen-linux-gnueabi/g" \
-	-e "s/EMULATED_ARCH_TRIPLE_LONG/\%\{emulated_arch_long\}-tizen-linux-gnueabi/g"
+# the script takes qemu-accel.spec and creates the qemu-accel-* packages
+for arch in armv7l aarch64; do
 
-cp qemu-accel.spec.in qemu-accel-aarch64.spec
-sed -i qemu-accel-aarch64.spec \
-	-e "s/EMULATED_ARCH_LONG/aarch64/g" \
-	-e "s/EMULATED_ARCH_SHORT/aarch64/g" \
-	-e "s/EMULATED_ARCH_SYNONIM/arm64/g" \
-	-e "s/EMULATED_ARCH_TRIPLE_SHORT/\%\{emulated_arch_short\}-tizen-linux/g" \
-	-e "s/EMULATED_ARCH_TRIPLE_LONG/\%\{emulated_arch_long\}-tizen-linux/g"
+   echo -n "Building package for $arch --> gcc-$arch ..."
+
+   echo "%define cross $arch" > qemu-accel-${arch}.spec
+   echo "%define $arch 1" >> qemu-accel-${arch}.spec
+   echo "" >> qemu-accel-${arch}.spec
+   cat qemu-accel.spec >> qemu-accel-${arch}.spec
+   echo " done."
+done
 

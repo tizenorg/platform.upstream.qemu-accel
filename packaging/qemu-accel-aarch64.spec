@@ -1,7 +1,11 @@
+%define cross aarch64
+%define aarch64 1
+
 #
 # spec file for package qemu-accel-ARCH, where ARCH = armv7l or aarch64
 #
 # Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2015 Tizen
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -12,42 +16,35 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via http://bugs.tizen.org/
 #
 
-%define emulated_arch_long aarch64
-%define emulated_arch_short aarch64
-%define emulated_arch_synonim arm64
-%define emulated_arch_triple_short %{emulated_arch_short}-tizen-linux
-%define emulated_arch_triple_long %{emulated_arch_long}-tizen-linux
 
-# Check whether macro "gcc_version" was defined via project config
-%if 0%{?gcc_version}
-%else
-# If the macro was undefined, set it to this default value:
-%define gcc_version 49
+#arm
+%define target_cpu %{cross}
+%define target_abi %{?armv7l:eabi}
+%define target_arch %{target_cpu}-tizen-linux-gnu%{?target_abi}
+%define libdir %{_prefix}/lib%{?aarch64:64}
+
+# default path in qemu
+%define our_path /emul
+
+%ifarch %ix86
+%define ARCH i586
 %endif
-%{expand:%%define gcc_version_dot %(echo -n "%{gcc_version}" | sed -e "s/\([0-9]\)\([0-9]\)/\1.\2/g")}
+%ifarch x86_64
+%define ARCH x86_64
+%endif
+%define host_arch %{ARCH}-tizen-linux-gnu%{?ABI}
 
-# Choose which gcc hijack method (if any) to use.
-# Only select one of the two at a time!
-%define hijack_gcc 1
-
-
-Name:           qemu-accel-%{emulated_arch_long}
+Name:           qemu-accel-%{cross}
 Version:        0.4
 Release:        0
 AutoReqProv:    off
-Source0:		ld-wrapper.sh
-Source1:		gcc-wrapper.sh
-BuildRequires:  cross-%{emulated_arch_short}-binutils
-BuildRequires:  cross-%{emulated_arch_short}-binutils-gold
-%if %hijack_gcc
-BuildRequires:  cross-%{emulated_arch_long}-gcc%{gcc_version}-icecream-backend
-%endif
+BuildRequires:  gcc-%{cross}
+BuildRequires:  binutils-%{cross}
 #BuildRequires:  expect
 BuildRequires:  fdupes
-BuildRequires:  gcc-c++
 BuildRequires:  gettext-runtime
 BuildRequires:  gettext-tools
 BuildRequires:  m4
@@ -59,33 +56,18 @@ BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
 BuildRequires:	cmake
+BuildRequires:	libstdc++
 Requires:       coreutils
-Requires(post): update-alternatives
-Requires(postun): update-alternatives
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
 ExclusiveArch:  x86_64 %ix86
 
 
-# default path in qemu
-%define HOST_ARCH %(echo -n "%{_host_cpu}" | sed -e "s/i.86/i586/;s/ppc/powerpc/;s/sparc64.*/sparc64/;s/sparcv.*/sparc/;")
-%define our_path /emul/%{HOST_ARCH}-for-%{emulated_arch_short}
-%ifarch %ix86
-%define icecream_cross_env cross-%{emulated_arch_long}-gcc%{gcc_version}-icecream-backend_i386
-%else
-%define icecream_cross_env cross-%{emulated_arch_long}-gcc%{gcc_version}-icecream-backend_x86_64
-%endif
-%define binaries_binutils addr2line ar as elfedit gprof ld ld.bfd ld.gold nm objcopy objdump ranlib readelf size strings strip
-%define binaries_binutils_comma %(echo %{binaries_binutils} | sed -e "s/ /,/g")
 
-%define bfd_plugin_dir      %{_bindir}/../lib/bfd-plugins
-%define bfd_plugin_lto_name liblto_plugin_%{_arch}.so
-%define bfd_plugin_lto      %{bfd_plugin_dir}/%{bfd_plugin_lto_name}
-%define gcc_plugin_lto %{our_path}%{_libdir}/gcc/%{emulated_arch_triple_long}/%{gcc_version_dot}/liblto_plugin.so
 
 %description
-This package is used in %{emulated_arch_long} architecture builds using qemu to speed up builds
+This package is used in %{cross} architecture builds using qemu to speed up builds
 with native binaries.
 This should not be installed on systems, it is just intended for qemu environments.
 
@@ -94,71 +76,41 @@ This should not be installed on systems, it is just intended for qemu environmen
 %build
 
 %install
+gcc_version=`gcc --version | sed -ne '1s/.* //p'`
 binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
 %ifarch %ix86
-  LD="/lib/ld-linux.so.2"
-%else
+  LD="/%{_lib}/ld-linux.so.2"
+%endif
 %ifarch x86_64
-  LD="/lib64/ld-linux-x86-64.so.2"
-%else
-  echo "ERROR unhandled arch"
-  exit 1
+  LD="/%{_lib}/ld-linux-x86-64.so.2"
 %endif
-%endif
-
-# XXX this fails with the following error:
-#     /opt/testing/bin/python: error while loading shared libraries: libpython2.7.so.1.0: wrong ELF class: ELFCLASS32
 
 for executable in $LD \
-   /usr/bin/bash \
-   /usr/bin/{rpm,rpm2cpio,rpmdb,rpmkeys,rpmqpack,rpmbuild,rpmsign,rpmspec} \
+   %{_bindir}/bash \
+   %{_bindir}/{rpm,rpm2cpio,rpmdb,rpmkeys,rpmqpack,rpmbuild,rpmsign,rpmspec} \
    %{_libdir}/rpm-plugins/exec.so \
    %{_libdir}/{libdb-4.8.so,libdb_cxx-4.8.so} \
-   /usr/bin/{tar,gzip,bzip2,xz,xzdec} \
-   /usr/bin/{grep,sed} \
-%ifarch %ix86
+   %{_bindir}/{tar,gzip,bzip2,xz,xzdec} \
+   %{_bindir}/{grep,sed} \
    %{_libdir}/libnssdbm3.so %{_libdir}/libsoftokn3.so %{_libdir}/libfreebl3.so \
-%else
-   /usr/lib64/libnssdbm3.so /usr/lib64/libsoftokn3.so /lib64/libfreebl3.so \
-%endif
-   /usr/bin/{cat,expr,mkdir,mv,rm,rmdir} \
-   /usr/bin/{msgexec,msgfmt,msgcat,msgmerge} \
-   /usr/bin/make \
-   /usr/bin/m4 \
-   /usr/bin/patch \
-   /usr/bin/%{emulated_arch_triple_short}-{%{binaries_binutils_comma}} \
-   /usr/bin/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
-   /usr/bin/xsltproc \
-   /usr/bin/{ccmake,cmake,cpack,ctest}
+   %{_bindir}/{cat,expr,mkdir,mv,rm,rmdir} \
+   %{_bindir}/{msgexec,msgfmt,msgcat,msgmerge} \
+   %{_bindir}/make \
+   %{_bindir}/m4 \
+   %{_bindir}/patch \
+   %{_bindir}/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
+   %{_bindir}/xsltproc \
+   %{_bindir}/{ccmake,cmake,cpack,ctest} \
+   %{_bindir}/%{target_arch}-{addr2line,ar,as,c++filt,dwp,elfedit,gprof,ld,ld.bfd,ld.gold,nm,objcopy,objdump,ranlib,readelf,size,strings,strip} \
+   %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov,gfortran} \
+   %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,f951,lto1,lto-wrapper,liblto_plugin.so}
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
 
-%if %hijack_gcc
-# extract cross-compiler
-mkdir -p cross-compiler-tmp
-for executable in $(tar -C cross-compiler-tmp -xvzf /usr/share/icecream-envs/cross-%{emulated_arch_long}-gcc%{gcc_version}-icecream-backend_*.tar.gz); do
-    if [ ! -d "cross-compiler-tmp/$executable" ] ; then
-        binaries="$binaries cross-compiler-tmp/$executable"
-    fi
-done
-%endif
-
-
-%if %hijack_gcc
-# Install
-mkdir -p %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env}
-cp -a /usr/share/icecream-envs/%{icecream_cross_env}.tar.gz \
-      %buildroot%{our_path}/usr/share/icecream-envs
-# And extract it for direct usage
-tar xvz -C %buildroot%{our_path}/usr/share/icecream-envs/%{icecream_cross_env} -f /usr/share/icecream-envs/cross-%{emulated_arch_long}-gcc%{gcc_version}-icecream-backend_*.tar.gz
-# It needs a tmp working directory which is writable
-install -d -m0755 %buildroot%{our_path}/usr/share/icecream-envs
-%endif
-
 for binary in $binaries
 do
-  outfile=%buildroot%{our_path}$(echo $binary | sed 's:cross-compiler-tmp::;s:/opt/cross/%{emulated_arch_triple_long}:/usr:')
+  outfile=%{buildroot}/%{our_path}/$binary
   [ -f $outfile ] && continue
   mkdir -p ${outfile%/*}
   cp -aL $binary $outfile
@@ -171,7 +123,7 @@ do
   fi
   rm -f $outfile.data
   [ "$binary" == "$LD" ] && continue
-  patchelf --debug --set-rpath "%our_path/%_lib:%our_path%_libdir" $outfile
+  patchelf --debug --set-rpath "%{our_path}/%{libdir}" $outfile
 # not all binaries have an .interp section
   if patchelf --print-interpreter $outfile; then
     patchelf --debug --set-interpreter %{our_path}$LD $outfile
@@ -179,143 +131,53 @@ do
 done
 
 # create symlinks for bash
-mkdir -p "%{buildroot}%{our_path}/bin/"
-mkdir -p "%{buildroot}%{our_path}/usr/bin/"
-ln -sf ../usr/bin/bash "%{buildroot}%{our_path}/bin/sh"
-ln -sf ../../bin/bash "%{buildroot}%{our_path}/usr/bin/sh"
-
-# binutils needs to be exposed in /usr/bin
-if [ ! -d %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin ] ; then
-  mkdir -p %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin
+ln -s usr/bin "%{buildroot}%{our_path}/bin"
+ln -sf bash "%{buildroot}%{our_path}/usr/bin/sh"
+# move everything into single /usr/lib
+mkdir -p %{buildroot}%{our_path}/usr/lib_new
+mv %{buildroot}%{our_path}%{_libdir}/gcc/%{host_arch}/${gcc_version}/*.so* %{buildroot}%{our_path}%{_libdir}/
+if [ ! "%{_libdir}" == "%{libdir}" ]; then
+  rm -rf %{buildroot}%{our_path}%{_libdir}/gcc
 fi
-
-for i in %{binaries_binutils} ; do
-  if [ -f %{buildroot}%{our_path}/%{_bindir}/%{emulated_arch_triple_short}-$i ] ; then
-    mv %{buildroot}%{our_path}/%{_bindir}/%{emulated_arch_triple_short}-$i %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/$i
-    if [ -f %{buildroot}%{our_path}/%{_bindir}/$i ] ; then
-      rm %{buildroot}%{our_path}/%{_bindir}/$i
-    fi
-    ln -s ../%{emulated_arch_triple_short}/bin/$i %{buildroot}%{our_path}/%{_bindir}/$i
-    ln -s ../%{emulated_arch_triple_short}/bin/$i %{buildroot}%{our_path}/%{_bindir}/%{emulated_arch_triple_short}-$i
-  fi
+for dir in /usr/lib /usr/lib64 /lib64 /lib; do
+  [ -d "%{buildroot}%{our_path}$dir" ] || continue
+  mv %{buildroot}%{our_path}$dir/* %{buildroot}%{our_path}/usr/lib_new
 done
-pushd %{buildroot}%{our_path} &&  ln -s usr/bin && popd
+rm -rf %{buildroot}%{our_path}/{usr/lib64,usr/lib,lib64,lib}
+mv %{buildroot}%{our_path}/usr/lib_new %{buildroot}%{our_path}/usr/lib
+ln -s lib %{buildroot}%{our_path}/usr/lib64
+ln -s usr/lib %{buildroot}%{our_path}/lib64
+ln -s usr/lib %{buildroot}%{our_path}/lib
 
-%if %hijack_gcc
-# create symlinks for lib64 / lib mappings (gcc!)
-mkdir -p "%{buildroot}%{our_path}/usr/lib/"
-# binutils secondary directories
-mkdir -p %{buildroot}%{our_path}/usr/%{emulated_arch_triple_long}/
-ln -sf ../bin %{buildroot}%{our_path}/usr/%{emulated_arch_triple_long}/bin
 
-%ifarch %ix86
-ln -sf ../lib/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
-%else
-ln -sf ../lib64/gcc "%{buildroot}%{our_path}/usr/lib/gcc"
-%endif
-
-# Enable wrapper for GCC compiler:
-mv %{buildroot}%{our_path}/usr/bin/gcc{,.real}
-mv %{buildroot}%{our_path}/usr/bin/g++{,.real}
-cp %{SOURCE1} %{buildroot}%{our_path}/usr/bin/gcc-wrapper.sh
-chmod 755 %{buildroot}%{our_path}/usr/bin/gcc-wrapper.sh
-sed -i -e "s|wrapper-config.sh|%{our_path}/usr/bin/wrapper-config.sh|" %{buildroot}%{our_path}/usr/bin/gcc-wrapper.sh
-
-# Create symlinks for different synonims of compiler names:
-for compiler in gcc cc g++ c++ ; do
-  ln -sf gcc-wrapper.sh %{buildroot}%{our_path}/usr/bin/${compiler}
-  ln -sf gcc-wrapper.sh %{buildroot}%{our_path}/usr/bin/${compiler}-%{gcc_version_dot}
-  ln -sf ${compiler}.real %{buildroot}%{our_path}/usr/bin/${compiler}-%{gcc_version_dot}.real
+# rename binutils binaries
+for binary in addr2line ar as c++filt dwp elfedit gprof ld ld.bfd ld.gold nm objcopy objdump ranlib readelf size strings strip
+do
+  mv %{buildroot}/%{our_path}/%{_bindir}/%{target_arch}-$binary %{buildroot}/%{our_path}/%{_bindir}/$binary
 done
-# g++ can also be called c++
-ln -sf g++.real "%{buildroot}%{our_path}/usr/bin/c++.real"
-# gcc can also be called cc
-ln -sf gcc.real "%{buildroot}%{our_path}/usr/bin/cc.real"
-
-
-# allow abuild to do the mv
-chmod 755 %{buildroot}/emul
-
-# make cross ld work with emulated compilers
-cp %{SOURCE0} %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/ld-wrapper.sh
-sed -i -e "s|wrapper-config.sh|%{our_path}/usr/bin/wrapper-config.sh|" %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/ld-wrapper.sh
-
-for LD_NAME in ld ld.gold ; do
-  mv %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/${LD_NAME}{,.real}
-  ln -s ld-wrapper.sh %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/${LD_NAME}
+mkdir -p %{buildroot}/%{our_path}/%{_prefix}/%{target_arch}/bin
+for binary in ar as ld{,.bfd,.gold} nm obj{copy,dump} ranlib strip; do
+  ln -sf %{our_path}/%{_bindir}/$binary %{buildroot}/%{our_path}/%{_prefix}/%{target_arch}/bin/$binary
 done
 
-# Write config that will be used by wrappers at run-time.
-echo '
-QEMU_NAME=/usr/bin/qemu-%{emulated_arch_synonim}
-CROSS_ACCELERATION_DIRECTORY=%{our_path}
-GCC_LIBEXEC_DIRECTORY=%{_libdir}/gcc/%{emulated_arch_triple_long}/%{gcc_version_dot}
-CROSS_BIN_PREFIX=/usr/%{emulated_arch_triple_short}/bin
-NATIVE_BIN_PREFIX=/usr/%{emulated_arch_triple_long}/bin
-' > %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/wrapper-config.sh
-ln -s %{our_path}/usr/%{emulated_arch_triple_short}/bin/wrapper-config.sh %{buildroot}%{our_path}/usr/bin/wrapper-config.sh
+for bin in c++ g++ cpp gcc gcc-${gcc_version} gcc-ar gcc-nm gcc-ranlib gcov gfortran
+do
+  mv %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}/%{_bindir}/$bin
+  ln -s $bin %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-$bin
+done
+ln -s gcc %{buildroot}/%{our_path}/%{_bindir}/cc
 
-chmod 755 %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin/ld-wrapper.sh
-
-%if "%{emulated_arch_short}" == "arm"
-#
-# as is not writing right EABI ELF header inside of arm environment for unknown
-# reason.
-# TODO: Still the case (2014-12-11).
-#
-mv %{buildroot}%{our_path}/usr/bin/as{,.real}
-echo '#!/bin/bash
-exec -a /usr/bin/as %{our_path}/usr/bin/as.real -meabi=5 "$@"
-' > %{buildroot}%{our_path}/usr/bin/as
-chmod +x %{buildroot}%{our_path}/usr/bin/as
-%endif
-
-# To support gcc sysroot
-mkdir -p %{buildroot}/usr/%{emulated_arch_triple_long}
-ln -sf .. %{buildroot}/usr/%{emulated_arch_triple_long}/usr
-ln -sf ../include %{buildroot}/usr/%{emulated_arch_triple_long}/include
-%endif
-
-# Make QEMU available through /qemu
-mkdir %buildroot/qemu
-cp -L /usr/bin/qemu-%{emulated_arch_short}{,-binfmt} %buildroot/qemu/
-mkdir -p %buildroot/usr/bin/
-
-if [[ %{emulated_arch_short} != %{emulated_arch_synonim} ]] ; then
-  ln -sf /qemu/qemu-%{emulated_arch_short} %buildroot/qemu/qemu-%{emulated_arch_synonim}
-  ln -sf /qemu/qemu-%{emulated_arch_short}-binfmt %buildroot/qemu/qemu-%{emulated_arch_synonim}-binfmt
-fi
-
-
-export NO_BRP_CHECK_RPATH="true"
-
-rm -rf %{buildroot}/%{our_path}/bin
-ln -s %{our_path}/usr/bin %{buildroot}/%{our_path}/bin
-rm -rf %{buildroot}/%{our_path}/sbin
-ln -s %{our_path}/usr/sbin %{buildroot}/%{our_path}/sbin
-
-ln -s %{our_path}/usr/bin/rpm %{buildroot}/%{our_path}/usr/bin/rpmquery
-ln -s %{our_path}/usr/bin/rpm %{buildroot}/%{our_path}/usr/bin/rpmverify
-
-mkdir -p "%{buildroot}%{bfd_plugin_dir}"
-touch "%{buildroot}%{bfd_plugin_lto}"
+sed -i -e "s,#PLUGIN_REPLACEMENT_LINE#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/%{gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/%{gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 
 %post
 ldconfig
-"%_sbindir/update-alternatives" --install \
-    "%{bfd_plugin_lto}" "%{bfd_plugin_lto_name}" "%{gcc_plugin_lto}" 3
 
 %postun
 ldconfig
-"%_sbindir/update-alternatives" --remove %{bfd_plugin_lto_name} "%{gcc_plugin_lto}"
+
 
 %files
 %defattr(-,root,root)
-%dir /usr/%{emulated_arch_triple_long}
-/usr/%{emulated_arch_triple_long}/usr
-/usr/%{emulated_arch_triple_long}/include
-/emul
-/qemu
-%ghost %{bfd_plugin_lto}
+%{our_path}
 
 %changelog
