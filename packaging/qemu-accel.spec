@@ -58,7 +58,7 @@ Requires:       coreutils
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
-ExclusiveArch:  x86_64 %ix86
+ExcludeArch:  %{cross}
 
 
 
