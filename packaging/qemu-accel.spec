@@ -164,7 +164,7 @@ done
 mv %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-gcov %{buildroot}/%{our_path}/%{_bindir}/gcov
 ln -s gcc %{buildroot}/%{our_path}/%{_bindir}/cc
 
-sed -i -e "s,#PLUGIN_REPLACEMENT_LINE#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/%{gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/%{gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
+sed -i -e "s,#PLUGIN_REPLACEMENT_LINE#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 
 %post
 ldconfig
