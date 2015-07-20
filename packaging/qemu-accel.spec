@@ -54,7 +54,6 @@ BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
 BuildRequires:	cmake
 BuildRequires:	libstdc++
-Requires:       coreutils
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
