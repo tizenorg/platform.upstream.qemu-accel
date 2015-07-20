@@ -157,11 +157,12 @@ for binary in ar as ld{,.bfd,.gold} nm obj{copy,dump} ranlib strip; do
   ln -sf %{our_path}/%{_bindir}/$binary %{buildroot}/%{our_path}/%{_prefix}/%{target_arch}/bin/$binary
 done
 
-for bin in c++ g++ cpp gcc gcc-${gcc_version} gcc-ar gcc-nm gcc-ranlib gcov gfortran
+for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib gfortran
 do
   mv %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}/%{_bindir}/$bin
   ln -s $bin %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-$bin
 done
+mv %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-gcov %{buildroot}/%{our_path}/%{_bindir}/gcov
 ln -s gcc %{buildroot}/%{our_path}/%{_bindir}/cc
 
 sed -i -e "s,#PLUGIN_REPLACEMENT_LINE#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/%{gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/%{gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
