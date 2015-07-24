@@ -149,20 +149,29 @@ ln -s usr/lib %{buildroot}%{our_path}/lib
 # rename binutils binaries
 for binary in addr2line ar as c++filt dwp elfedit gprof ld ld.bfd ld.gold nm objcopy objdump ranlib readelf size strings strip
 do
-  mv %{buildroot}/%{our_path}/%{_bindir}/%{target_arch}-$binary %{buildroot}/%{our_path}/%{_bindir}/$binary
+  mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$binary %{buildroot}%{our_path}%{_bindir}/$binary
 done
 mkdir -p %{buildroot}/%{our_path}/%{_prefix}/%{target_arch}/bin
 for binary in ar as ld{,.bfd,.gold} nm obj{copy,dump} ranlib strip; do
-  ln -sf %{our_path}/%{_bindir}/$binary %{buildroot}/%{our_path}/%{_prefix}/%{target_arch}/bin/$binary
+  ln -sf %{our_path}%{_bindir}/$binary %{buildroot}%{our_path}%{_prefix}/%{target_arch}/bin/$binary
 done
 
 for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib gfortran
 do
-  mv %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}/%{_bindir}/$bin
-  ln -s $bin %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-$bin
+  mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}%{_bindir}/$bin
+  ln -s $bin %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin
 done
-mv %{buildroot}%{our_path}/%{_bindir}/%{target_arch}-gcov %{buildroot}/%{our_path}/%{_bindir}/gcov
-ln -s gcc %{buildroot}/%{our_path}/%{_bindir}/cc
+mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-gcov %{buildroot}%{our_path}%{_bindir}/gcov
+ln -s gcc %{buildroot}%{our_path}/%{_bindir}/cc
+
+# rpmbuild on generating requires tag for gobject-introspection binaries
+# selects (64-bit) suffix for libs based on ${HOSTTYPE} bash variable
+# so we replace x86_64 to armv7l to avoid bogus dependencies
+%ifarch x86_64
+%{?armv7l:
+sed -i -e "s/x86_64/armv7l/g" %{buildroot}%{our_path}%{_bindir}/bash
+}
+%endif
 
 sed -i -e "s,#PLUGIN_REPLACEMENT_LINE#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 
