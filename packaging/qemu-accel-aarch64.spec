@@ -56,6 +56,7 @@ BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
 BuildRequires:	cmake
+BuildRequires:	gawk
 BuildRequires:	libstdc++
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
@@ -96,6 +97,7 @@ for executable in $LD \
    %{_bindir}/{msgexec,msgfmt,msgcat,msgmerge} \
    %{_bindir}/make \
    %{_bindir}/m4 \
+   %{_bindir}/{awk,gawk} \
    %{_bindir}/patch \
    %{_bindir}/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
    %{_bindir}/xsltproc \
