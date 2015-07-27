@@ -132,6 +132,7 @@ done
 # create symlinks for bash
 ln -s usr/bin "%{buildroot}%{our_path}/bin"
 ln -sf bash "%{buildroot}%{our_path}/usr/bin/sh"
+
 # move everything into single /usr/lib
 mkdir -p %{buildroot}%{our_path}/usr/lib_new
 mv %{buildroot}%{our_path}%{_libdir}/gcc/%{host_arch}/${gcc_version}/*.so* %{buildroot}%{our_path}%{_libdir}/
@@ -175,6 +176,11 @@ ln -s gcc %{buildroot}%{our_path}/%{_bindir}/cc
 sed -i -e "s/x86_64/armv7l/g" %{buildroot}%{our_path}%{_bindir}/bash
 }
 %endif
+
+# create symlinks for gcc build (CC_FOR_TARGET)
+mkdir -p %{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc
+ln -sf %{our_path}%{bindir}/gcc %{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xgcc
+ln -sf %{our_path}%{bindir}/g++ %{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xg++
 
 sed -i -e "s,#PLUGIN_REPLACEMENT_LINE#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 
