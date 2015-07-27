@@ -186,6 +186,7 @@ do
 done
 ln -sf %{our_path}%{_bindir}/gcc %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xgcc
 ln -sf %{our_path}%{_bindir}/g++ %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xg++
+ln -sf %{our_path}%{_bindir}/cpp %{buildroot}%{our_path}/usr/lib/cpp
 
 sed -i -e "s,#PLUGIN_REPLACEMENT_LINE#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 
