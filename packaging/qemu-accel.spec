@@ -176,6 +176,14 @@ sed -i -e "s/x86_64/armv7l/g" %{buildroot}%{our_path}%{_bindir}/bash
 
 # create symlinks for gcc build (CC_FOR_TARGET)
 mkdir -p %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc
+for binary in as cpp gcc-ar gcc-nm gcc-ranlib gcov gfortran nm
+do
+  ln -sf %{our_path}%{_bindir}/${binary} %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/${binary}
+done
+for binary in cc1 cc1plus collect2 f951 lto1 lto-wrapper
+do
+  ln -sf %{our_path}/usr/lib/gcc/%{target_arch}/${gcc_version}/${binary} %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/${binary}
+done
 ln -sf %{our_path}%{_bindir}/gcc %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xgcc
 ln -sf %{our_path}%{_bindir}/g++ %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xg++
 
