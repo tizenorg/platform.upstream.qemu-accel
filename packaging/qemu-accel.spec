@@ -175,9 +175,9 @@ sed -i -e "s/x86_64/armv7l/g" %{buildroot}%{our_path}%{_bindir}/bash
 %endif
 
 # create symlinks for gcc build (CC_FOR_TARGET)
-mkdir -p %{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc
-ln -sf %{our_path}%{bindir}/gcc %{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xgcc
-ln -sf %{our_path}%{bindir}/g++ %{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xg++
+mkdir -p %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc
+ln -sf %{our_path}%{bindir}/gcc %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xgcc
+ln -sf %{our_path}%{bindir}/g++ %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xg++
 
 sed -i -e "s,#PLUGIN_REPLACEMENT_LINE#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 
