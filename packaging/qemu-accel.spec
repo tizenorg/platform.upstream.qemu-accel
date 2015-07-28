@@ -34,7 +34,7 @@
 %endif
 %define host_arch %{ARCH}-tizen-linux-gnu%{?ABI}
 
-Name:           qemu-accel-%{cross}
+Name:           qemu-accel
 Version:        0.4
 Release:        0
 AutoReqProv:    off
