@@ -49,7 +49,6 @@ BuildRequires:  m4
 BuildRequires:  vim
 BuildRequires:  patchelf
 BuildRequires:  rpmlint-mini
-BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
 BuildRequires:	cmake
