@@ -95,6 +95,8 @@ for executable in $LD \
    %{_bindir}/m4 \
    %{_bindir}/{awk,gawk} \
    %{_bindir}/patch \
+   %{_bindir}/diff \
+   %{_bindir}/echo \
    %{_bindir}/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
    %{_bindir}/xsltproc \
    %{_bindir}/{ccmake,cmake,cpack,ctest} \
