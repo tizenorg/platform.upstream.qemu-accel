@@ -100,6 +100,7 @@ for executable in $LD \
    %{_bindir}/patch \
    %{_bindir}/diff \
    %{_bindir}/echo \
+   %{_bindir}/head \
    %{_bindir}/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
    %{_bindir}/xsltproc \
    %{_bindir}/{ccmake,cmake,cpack,ctest} \
