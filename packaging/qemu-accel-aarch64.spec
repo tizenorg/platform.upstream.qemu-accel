@@ -43,6 +43,7 @@ Release:        0
 AutoReqProv:    off
 BuildRequires:  gcc-%{cross}
 BuildRequires:  binutils-%{cross}
+BuildRequires:  libasan
 #BuildRequires:  expect
 BuildRequires:  fdupes
 BuildRequires:  gettext-runtime
