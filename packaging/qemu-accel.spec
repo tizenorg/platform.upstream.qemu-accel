@@ -139,7 +139,6 @@ ln -sf bash "%{buildroot}%{our_path}/usr/bin/sh"
 
 # move everything into single /usr/lib
 mkdir -p %{buildroot}%{our_path}/usr/lib_new
-mv %{buildroot}%{our_path}%{_libdir}/gcc/%{host_arch}/${gcc_version}/*.so* %{buildroot}%{our_path}%{_libdir}/
 if [ ! "%{_libdir}" == "%{libdir}" ]; then
   rm -rf %{buildroot}%{our_path}%{_libdir}/gcc
 fi
