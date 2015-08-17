@@ -49,6 +49,8 @@ BuildRequires:  libxslt-tools
 BuildRequires:  cmake
 BuildRequires:  gawk
 BuildRequires:  libstdc++
+BuildRequires:  python
+BuildRequires:  python-xml
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
@@ -66,6 +68,8 @@ This should not be installed on systems, it is just intended for qemu environmen
 
 %install
 gcc_version=`gcc --version | sed -ne '1s/.* //p'`
+# just like it is determided in python.spec
+python_version=`python --version |& sed -ne '1s/.* //p' | head -c 3`
 
 binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
 %ifarch %ix86
@@ -94,6 +98,8 @@ for executable in $LD \
    %{_bindir}/head \
    %{_bindir}/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
    %{_bindir}/xsltproc \
+   %{_bindir}/python${python_version} \
+   %{_libdir}/python${python_version}/lib-dynload/*.so \
    %{_bindir}/{ccmake,cmake,cpack,ctest} \
    %{_bindir}/%{target_arch}-{addr2line,ar,as,c++filt,dwp,elfedit,gprof,ld,ld.bfd,ld.gold,nm,objcopy,objdump,ranlib,readelf,size,strings,strip} \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov,gfortran} \
@@ -153,6 +159,23 @@ mkdir -p %{buildroot}/%{our_path}/%{_prefix}/%{target_arch}/bin
 for binary in ar as ld{,.bfd,.gold} nm obj{copy,dump} ranlib strip; do
   ln -sf %{our_path}%{_bindir}/$binary %{buildroot}%{our_path}%{_prefix}/%{target_arch}/bin/$binary
 done
+
+# create symlinks for python
+mv %{buildroot}%{our_path}%{_bindir}/python${python_version} %{buildroot}%{our_path}%{_bindir}/python${python_version}.orig
+cat > %{buildroot}%{our_path}%{_bindir}/python${python_version} << EOF
+#!/bin/bash
+if [ -z "\$PYTHONPATH" ]; then
+  export PYTHONPATH="%{libdir}/python${python_version}"
+else
+  export PYTHONPATH+=":%{libdir}/python${python_version}"
+fi
+export PYTHONHOME="%{our_path}%{_prefix}"
+%{our_path}%{_bindir}/python${python_version}.orig "\$@"
+EOF
+chmod +x %{buildroot}%{our_path}%{_bindir}/python${python_version}
+
+ln -s python${python_version} %{buildroot}%{our_path}%{_bindir}/python
+ln -s python${python_version} %{buildroot}%{our_path}%{_libdir}/python
 
 # rename gcc binaries
 for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib gfortran
