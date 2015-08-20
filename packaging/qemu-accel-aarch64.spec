@@ -29,6 +29,8 @@
 # default path in qemu
 %define our_path /emul
 
+%define qemubinname /qemu/qemu-%{?armv7l:arm}%{?aarch64:aarch64}
+
 Name:           qemu-accel
 Version:        0.4
 Release:        0
@@ -164,6 +166,7 @@ done
 mv %{buildroot}%{our_path}%{_bindir}/python${python_version} %{buildroot}%{our_path}%{_bindir}/python${python_version}.orig
 cat > %{buildroot}%{our_path}%{_bindir}/python${python_version} << EOF
 #!/bin/bash
+([ -e "/installed-pkg/python-devel" ] || [ -e "/installed-pkg/python-xml" ]) && exec %{qemubinname} /usr/bin/python${python_version} "\$@"
 if [ -z "\$PYTHONPATH" ]; then
   export PYTHONPATH="%{libdir}/python${python_version}"
 else
