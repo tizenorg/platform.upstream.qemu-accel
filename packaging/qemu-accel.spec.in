@@ -59,6 +59,8 @@ BuildRequires:  qemu-linux-user
 BuildRequires:	elfutils
 BuildRequires:	libxslt-tools
 BuildRequires:	cmake
+BuildRequires:  python
+BuildRequires:  python-xml
 Requires:       coreutils
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
@@ -89,11 +91,24 @@ This package is used in %{emulated_arch_long} architecture builds using qemu to 
 with native binaries.
 This should not be installed on systems, it is just intended for qemu environments.
 
+%package -n python-accel-%{emulated_arch_long}
+Version: %{version}
+Release: %{release}
+Summary: Binaries for python acceleration
+License:        GPL-2.0
+Group:          Development/Cross Compilation
+
+%description -n python-accel-%{emulated_arch_long}
+This package is used in qemu-accel to accelerate python.
+
 %prep
 
 %build
 
 %install
+# just like it is determided in python.spec
+python_version=`python --version |& sed -ne '1s/.* //p' | head -c 3`
+
 binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
 %ifarch %ix86
   LD="/lib/ld-linux.so.2"
@@ -126,6 +141,8 @@ for executable in $LD \
    /usr/bin/make \
    /usr/bin/m4 \
    /usr/bin/patch \
+   %{_bindir}/python${python_version} \
+   %{_libdir}/python${python_version}/lib-dynload/*.so \
    /usr/bin/%{emulated_arch_triple_short}-{%{binaries_binutils_comma}} \
    /usr/bin/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
    /usr/bin/xsltproc \
@@ -183,6 +200,23 @@ mkdir -p "%{buildroot}%{our_path}/bin/"
 mkdir -p "%{buildroot}%{our_path}/usr/bin/"
 ln -sf ../usr/bin/bash "%{buildroot}%{our_path}/bin/sh"
 ln -sf ../../bin/bash "%{buildroot}%{our_path}/usr/bin/sh"
+
+# create symlinks for python
+mv %{buildroot}%{our_path}%{_bindir}/python${python_version} %{buildroot}%{our_path}%{_bindir}/python${python_version}.orig
+cat > %{buildroot}%{our_path}%{_bindir}/python${python_version} << EOF
+#!/bin/bash
+if [ -z "\$PYTHONPATH" ]; then
+  export PYTHONPATH="%{_libdir}/python${python_version}"
+else
+  export PYTHONPATH+=":%{_libdir}/python${python_version}"
+fi
+export PYTHONHOME="%{our_path}%{_prefix}"
+%{our_path}%{_bindir}/python${python_version}.orig "\$@"
+EOF
+chmod +x %{buildroot}%{our_path}%{_bindir}/python${python_version}
+
+ln -s python${python_version} %{buildroot}%{our_path}%{_bindir}/python
+ln -s python${python_version} %{buildroot}%{our_path}%{_libdir}/python
 
 # binutils needs to be exposed in /usr/bin
 if [ ! -d %{buildroot}%{our_path}/usr/%{emulated_arch_triple_short}/bin ] ; then
@@ -316,6 +350,13 @@ ldconfig
 /usr/%{emulated_arch_triple_long}/include
 /emul
 /qemu
+%exclude %{our_path}%{_bindir}/python*
+%exclude %{our_path}%{_libdir}/python*/lib-dynload/*.so
 %ghost %{bfd_plugin_lto}
+
+%files -n python-accel-%{emulated_arch_long}
+%defattr(-,root,root)
+%{our_path}%{_bindir}/python*
+%{our_path}%{_libdir}/python*/lib-dynload/*.so
 
 %changelog
