@@ -49,6 +49,9 @@ BuildRequires:  libxslt-tools
 BuildRequires:  cmake
 BuildRequires:  gawk
 BuildRequires:  libstdc++
+%if 0%build_crt
+BuildRequires: clang
+%endif
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
@@ -96,7 +99,13 @@ for executable in $LD \
    %{_bindir}/xsltproc \
    %{_bindir}/{ccmake,cmake,cpack,ctest} \
    %{_bindir}/%{target_arch}-{addr2line,ar,as,c++filt,dwp,elfedit,gprof,ld,ld.bfd,ld.gold,nm,objcopy,objdump,ranlib,readelf,size,strings,strip} \
+%{!?build_crt: \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov,gfortran} \
+} \
+%{?build_crt: \
+   %{_bindir}/clang \
+   %{_bindir}/clang++ \
+} \
    %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,f951,lto1,lto-wrapper,liblto_plugin.so}
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
@@ -154,6 +163,7 @@ for binary in ar as ld{,.bfd,.gold} nm obj{copy,dump} ranlib strip; do
   ln -sf %{our_path}%{_bindir}/$binary %{buildroot}%{our_path}%{_prefix}/%{target_arch}/bin/$binary
 done
 
+%{!?build_crt:
 # rename gcc binaries
 for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib gfortran
 do
@@ -162,6 +172,24 @@ do
 done
 mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-gcov %{buildroot}%{our_path}%{_bindir}/gcov
 ln -s gcc %{buildroot}%{our_path}/%{_bindir}/cc
+}
+
+%{?build_crt:
+#create symlinks to clang
+ln -s clang %{buildroot}%{our_path}%{_bindir}/gcc
+ln -s clang++ %{buildroot}%{our_path}%{_bindir}/g++
+ln -s %{_libdir}/clang %{buildroot}%{our_path}%{_libdir}/clang
+mv %{buildroot}%{our_path}%{_bindir}/clang %{buildroot}%{our_path}%{_bindir}/clang.real
+mv %{buildroot}%{our_path}%{_bindir}/clang++ %{buildroot}%{our_path}%{_bindir}/clang++.real
+echo '#!/bin/bash
+exec %{our_path}%{_bindir}/clang.real --target=%{target_arch} $@
+' > %{buildroot}%{our_path}%{_bindir}/clang
+echo '#!/bin/bash
+exec %{our_path}%{_bindir}/clang++.real --target=%{target_arch} $@
+' > %{buildroot}%{our_path}%{_bindir}/clang++
+chmod +x %{buildroot}%{our_path}%{_bindir}/clang
+chmod +x %{buildroot}%{our_path}%{_bindir}/clang++
+}
 
 # rpmbuild when generating 'requires' tag for gobject-introspection binaries
 # selects (64-bit) suffix for libs based on ${HOSTTYPE} bash variable
@@ -172,6 +200,7 @@ sed -i -e "s/x86_64/armv7l/g" %{buildroot}%{our_path}%{_bindir}/bash
 }
 %endif
 
+%{!?build_crt:
 # create symlinks for gcc build (CC_FOR_TARGET)
 mkdir -p %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc
 for binary in as cpp gcc-ar gcc-nm gcc-ranlib gcov gfortran nm
@@ -187,6 +216,7 @@ ln -sf %{our_path}%{_bindir}/g++ %{buildroot}%{our_path}/home/abuild/rpmbuild/BU
 
 # support /lib/cpp
 ln -sf %{our_path}%{_bindir}/cpp %{buildroot}%{our_path}/usr/lib/cpp
+}
 
 # update baselibs.conf, overwrite LTO plugin
 sed -i -e "s,#PLUGIN_POSTIN#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
