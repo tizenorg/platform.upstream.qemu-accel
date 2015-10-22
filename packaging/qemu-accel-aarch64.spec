@@ -77,7 +77,7 @@ This package is used in qemu-accel to accelerate python.
 %build
 
 %install
-gcc_version=`gcc --version | sed -ne '1s/.* //p'`
+gcc_version=`gcc --version | sed -ne '1s/[^0-9]*\(\([0-9]\.\?\)*\).*/\1/p'`
 # just like it is determided in python.spec
 python_version=`python --version |& sed -ne '1s/.* //p' | head -c 3`
 
