@@ -51,6 +51,8 @@ BuildRequires:  gawk
 BuildRequires:  libstdc++
 BuildRequires:  python
 BuildRequires:  python-xml
+BuildRequires:  python-magic
+BuildRequires:  python-rpm
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
@@ -110,6 +112,7 @@ for executable in $LD \
    %{_bindir}/xsltproc \
    %{_bindir}/python${python_version} \
    %{_libdir}/python${python_version}/lib-dynload/*.so \
+   %{_libdir}/python${python_version}/site-packages/*/*.so \
    %{_bindir}/{ccmake,cmake,cpack,ctest} \
    %{_bindir}/%{target_arch}-{addr2line,ar,as,c++filt,dwp,elfedit,gprof,ld,ld.bfd,ld.gold,nm,objcopy,objdump,ranlib,readelf,size,strings,strip} \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov,gfortran} \
@@ -187,6 +190,29 @@ chmod +x %{buildroot}%{our_path}%{_bindir}/python${python_version}
 ln -s python${python_version} %{buildroot}%{our_path}%{_bindir}/python
 ln -s python${python_version} %{buildroot}%{our_path}%{_libdir}/python
 
+# rpmlint acceleration
+mkdir -p %{buildroot}%{our_path}/opt/testing/bin
+cp %{buildroot}%{our_path}%{_bindir}/python${python_version}.orig %{buildroot}%{our_path}/opt/testing/bin/
+cat > %{buildroot}%{our_path}/opt/testing/bin/python${python_version} << EOF
+#!/bin/bash
+if [ -z "\$PYTHONPATH" ]; then
+  export PYTHONPATH="%{libdir}/python${python_version}"
+else
+  export PYTHONPATH+=":%{libdir}/python${python_version}"
+fi
+export PYTHONHOME="%{our_path}%{_prefix}"
+%{our_path}/opt/testing/bin/python${python_version}.orig "\$@"
+EOF
+chmod +x %{buildroot}%{our_path}/opt/testing/bin/python${python_version}
+ln -s python${python_version} %{buildroot}%{our_path}/opt/testing/bin/python
+
+mkdir -p %{buildroot}%{our_path}%{_libdir}/python${python_version}/site-packages/rpm/
+mkdir -p %{buildroot}%{our_path}%{_libdir}/python${python_version}/encodings/
+cp %{_libdir}/python${python_version}/site-packages/rpm/*.py %{buildroot}%{our_path}%{_libdir}/python${python_version}/site-packages/rpm/
+cp %{_libdir}/python${python_version}/*.py %{buildroot}%{our_path}%{_libdir}/python${python_version}/
+cp %{_libdir}/python${python_version}/encodings/*.py %{buildroot}%{our_path}%{_libdir}/python${python_version}/encodings/
+
+
 # rename gcc binaries
 for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib gfortran
 do
@@ -239,11 +265,9 @@ ldconfig
 %defattr(-,root,root)
 %{our_path}
 %exclude %{our_path}%{_bindir}/python*
-%exclude %{our_path}%{_prefix}/lib/python*/lib-dynload/*.so
 
 %files -n python-accel
 %defattr(-,root,root)
 %{our_path}%{_bindir}/python*
-%{our_path}%{_prefix}/lib/python*/lib-dynload/*.so
 
 %changelog
