@@ -61,6 +61,8 @@ BuildRequires:	libxslt-tools
 BuildRequires:	cmake
 BuildRequires:  python
 BuildRequires:  python-xml
+BuildRequires:  python-magic
+BuildRequires:  python-rpm
 Requires:       coreutils
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
@@ -143,6 +145,7 @@ for executable in $LD \
    /usr/bin/patch \
    %{_bindir}/python${python_version} \
    %{_libdir}/python${python_version}/lib-dynload/*.so \
+   %{_libdir}/python${python_version}/site-packages/*/*.so \
    /usr/bin/%{emulated_arch_triple_short}-{%{binaries_binutils_comma}} \
    /usr/bin/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
    /usr/bin/xsltproc \
@@ -234,6 +237,28 @@ for i in %{binaries_binutils} ; do
   fi
 done
 pushd %{buildroot}%{our_path} &&  ln -s usr/bin && popd
+
+# rpmlint acceleration
+mkdir -p %{buildroot}%{our_path}/opt/testing/bin
+cp %{buildroot}%{our_path}%{_bindir}/python${python_version}.orig %{buildroot}%{our_path}/opt/testing/bin/
+cat > %{buildroot}%{our_path}/opt/testing/bin/python${python_version} << EOF
+#!/bin/bash
+if [ -z "\$PYTHONPATH" ]; then
+  export PYTHONPATH="%{libdir}/python${python_version}"
+else
+  export PYTHONPATH+=":%{libdir}/python${python_version}"
+fi
+export PYTHONHOME="%{our_path}%{_prefix}"
+%{our_path}/opt/testing/bin/python${python_version}.orig "\$@"
+EOF
+chmod +x %{buildroot}%{our_path}/opt/testing/bin/python${python_version}
+ln -s python${python_version} %{buildroot}%{our_path}/opt/testing/bin/python
+
+mkdir -p %{buildroot}%{our_path}%{_libdir}/python${python_version}/site-packages/rpm/
+mkdir -p %{buildroot}%{our_path}%{_libdir}/python${python_version}/encodings/
+cp %{_libdir}/python${python_version}/site-packages/rpm/*.py %{buildroot}%{our_path}%{_libdir}/python${python_version}/site-packages/rpm/
+cp %{_libdir}/python${python_version}/*.py %{buildroot}%{our_path}%{_libdir}/python${python_version}/
+cp %{_libdir}/python${python_version}/encodings/*.py %{buildroot}%{our_path}%{_libdir}/python${python_version}/encodings/
 
 %if %hijack_gcc
 # create symlinks for lib64 / lib mappings (gcc!)
@@ -351,12 +376,10 @@ ldconfig
 /emul
 /qemu
 %exclude %{our_path}%{_bindir}/python*
-%exclude %{our_path}%{_libdir}/python*/lib-dynload/*.so
 %ghost %{bfd_plugin_lto}
 
 %files -n python-accel-%{emulated_arch_long}
 %defattr(-,root,root)
 %{our_path}%{_bindir}/python*
-%{our_path}%{_libdir}/python*/lib-dynload/*.so
 
 %changelog
