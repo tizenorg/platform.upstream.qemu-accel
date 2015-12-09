@@ -76,7 +76,9 @@ This should not be installed on systems, it is just intended for qemu environmen
 %build
 
 %install
+set +x
 gcc_version=`gcc --version | sed -ne '1s/.* //p'`
+
 binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
 %ifarch %ix86
   LD="/%{_lib}/ld-linux.so.2"
@@ -114,6 +116,17 @@ do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
 
+## dump list of binaries and list of packages
+echo "### binaries to accelerate ###"
+echo $binaries | sed -e 's/[^ ]*\///g;s/[^ ]*.so[^ ]* \?//g'
+echo "### packages that are used ###"
+for bin in $binaries
+do
+  rpm -qf $bin
+done | grep -v "not owned" | sed -e "s/-[0-9].*//g" | sort -u
+echo ""
+
+
 for binary in $binaries
 do
   outfile=%{buildroot}/%{our_path}/$binary
@@ -129,10 +142,10 @@ do
   fi
   rm -f $outfile.data
   [ "$binary" == "$LD" ] && continue
-  patchelf --debug --set-rpath "%{our_path}/%{libdir}" $outfile
+  patchelf --set-rpath "%{our_path}/%{libdir}" $outfile
 # not all binaries have an .interp section
-  if patchelf --print-interpreter $outfile; then
-    patchelf --debug --set-interpreter %{our_path}$LD $outfile
+  if patchelf --print-interpreter $outfile 1>/dev/null 2>/dev/null; then
+    patchelf --set-interpreter %{our_path}$LD $outfile
   fi
 done
 
@@ -197,6 +210,8 @@ ln -sf %{our_path}%{_bindir}/gcc %{buildroot}%{our_path}/home/abuild/rpmbuild/BU
 ln -sf %{our_path}%{_bindir}/g++ %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/xg++
 ln -sf %{our_path}%{_bindir}/cpp %{buildroot}%{our_path}/usr/lib/cpp
 
+set -x
+# update baselibs.conf, overwrite LTO plugin
 sed -i -e "s,#PLUGIN_POSTIN#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 sed -i -e "s,#PLUGIN_POSTUN#,ln -sf liblto_plugin.so.0 %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 
