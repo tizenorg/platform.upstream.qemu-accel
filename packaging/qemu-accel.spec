@@ -76,6 +76,7 @@ This package is used in qemu-accel to accelerate python.
 %build
 
 %install
+set +x
 gcc_version=`gcc --version | sed -ne '1s/[^0-9]*\(\([0-9]\.\?\)*\).*/\1/p'`
 # just like it is determided in python.spec
 python_version=`python --version |& sed -ne '1s/.* //p' | head -c 3`
@@ -120,6 +121,17 @@ do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
 
+## dump list of binaries and list of packages
+echo "### binaries to accelerate ###"
+echo $binaries | sed -e 's/[^ ]*\///g;s/[^ ]*.so[^ ]* \?//g'
+echo "### packages that are used ###"
+for bin in $binaries
+do
+  rpm -qf $bin
+done | grep -v "not owned" | sed -e "s/-[0-9].*//g" | sort -u
+echo ""
+
+
 for binary in $binaries
 do
   outfile=%{buildroot}/%{our_path}/$binary
@@ -135,10 +147,10 @@ do
   fi
   rm -f $outfile.data
   [ "$binary" == "$LD" ] && continue
-  patchelf --debug --set-rpath "%{our_path}/%{libdir}" $outfile
+  patchelf --set-rpath "%{our_path}/%{libdir}" $outfile
 # not all binaries have an .interp section
-  if patchelf --print-interpreter $outfile; then
-    patchelf --debug --set-interpreter %{our_path}$LD $outfile
+  if patchelf --print-interpreter $outfile 1>/dev/null 2>/dev/null; then
+    patchelf --set-interpreter %{our_path}$LD $outfile
   fi
 done
 
@@ -246,6 +258,7 @@ ln -sf %{our_path}%{_bindir}/g++ %{buildroot}%{our_path}/home/abuild/rpmbuild/BU
 # support /lib/cpp
 ln -sf %{our_path}%{_bindir}/cpp %{buildroot}%{our_path}/usr/lib/cpp
 
+set -x
 # update baselibs.conf, overwrite LTO plugin
 sed -i -e "s,#PLUGIN_POSTIN#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 sed -i -e "s,#PLUGIN_POSTUN#,ln -sf liblto_plugin.so.0 %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
