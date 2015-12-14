@@ -111,8 +111,6 @@ for executable in $LD \
    %{_bindir}/head \
    %{_bindir}/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
    %{_bindir}/xsltproc \
-   %{_bindir}/pkg-config \
-   %{_bindir}/file \
    %{_bindir}/python${python_version} \
    %{_libdir}/python${python_version}/lib-dynload/*.so \
    %{_libdir}/python${python_version}/site-packages/*/*.so \
