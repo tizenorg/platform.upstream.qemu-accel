@@ -66,6 +66,7 @@ BuildRequires:  python-magic
 BuildRequires:  python-rpm
 BuildRequires:  findutils
 BuildRequires:  diffutils
+BuildRequires:  file
 Requires:       coreutils
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
@@ -155,7 +156,8 @@ for executable in $LD \
    /usr/bin/{ccmake,cmake,cpack,ctest} \
    /usr/bin/{find,xargs} \
    /usr/bin/{cmp,diff,diff3,sdiff} \
-   /usr/bin/cpio
+   /usr/bin/cpio \
+   /usr/bin/file
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
 done
