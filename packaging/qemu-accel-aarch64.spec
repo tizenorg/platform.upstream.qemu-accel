@@ -151,7 +151,7 @@ for executable in $LD \
    %{_libdir}/python${python_version}/lib-dynload/*.so \
    %{_libdir}/python${python_version}/site-packages/*/*.so \
    /usr/bin/%{emulated_arch_triple_short}-{%{binaries_binutils_comma}} \
-   /usr/bin/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
+   /usr/bin/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,strings,strip,unstrip} \
    /usr/bin/xsltproc \
    /usr/bin/{ccmake,cmake,cpack,ctest} \
    /usr/bin/{find,xargs} \
