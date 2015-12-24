@@ -107,7 +107,7 @@ for executable in $LD \
    %{_bindir}/diff \
    %{_bindir}/echo \
    %{_bindir}/head \
-   %{_bindir}/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,stack,strings,strip,unstrip} \
+   %{_bindir}/eu-{addr2line,ar,elfcmp,elflint,findtextrel,ld,nm,objdump,ranlib,readelf,size,strings,strip,unstrip} \
    %{_bindir}/xsltproc \
    %{_bindir}/python${python_version} \
    %{_libdir}/python${python_version}/lib-dynload/*.so \
