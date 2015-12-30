@@ -83,7 +83,7 @@ This package is used in qemu-accel to accelerate python.
 set +x
 gcc_version=`gcc --version | sed -ne '1s/[^0-9]*\(\([0-9]\.\?\)*\).*/\1/p'`
 # just like it is determided in python.spec
-python_version=`python --version |& sed -ne '1s/.* //p' | head -c 3`
+python_version=`python --version 2>&1 | sed -ne '1s/.* //p' | head -c 3`
 
 binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
 %ifarch %ix86
