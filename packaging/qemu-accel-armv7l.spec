@@ -44,6 +44,7 @@ BuildRequires:  m4
 BuildRequires:  vim
 BuildRequires:  patchelf
 BuildRequires:  rpmlint-mini
+BuildRequires:  rpmlint-tizen
 BuildRequires:  elfutils
 BuildRequires:  libxslt-tools
 BuildRequires:  cmake
