@@ -55,6 +55,7 @@ BuildRequires:  python-xml
 BuildRequires:  python-magic
 BuildRequires:  python-rpm
 BuildRequires:  file
+BuildRequires:  sudo
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
@@ -121,6 +122,7 @@ for executable in $LD \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov,gfortran} \
    %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,f951,lto1,lto-wrapper,liblto_plugin.so} \
    %{_bindir}/file \
+   %{_bindir}/sudo \
    %{_bindir}/{find,xargs}
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"

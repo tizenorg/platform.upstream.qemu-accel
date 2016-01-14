@@ -55,6 +55,7 @@ BuildRequires:  python-xml
 BuildRequires:  python-magic
 BuildRequires:  python-rpm
 BuildRequires:  file
+BuildRequires:  sudo
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
@@ -84,7 +85,7 @@ This package is used in qemu-accel to accelerate python.
 set +x
 gcc_version=`gcc --version | sed -ne '1s/[^0-9]*\(\([0-9]\.\?\)*\).*/\1/p'`
 # just like it is determided in python.spec
-python_version=`python --version  2>&1 | sed -ne '1s/.* //p' | head -c 3`
+python_version=`python --version 2>&1 | sed -ne '1s/.* //p' | head -c 3`
 
 binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
 %ifarch %ix86
@@ -121,6 +122,7 @@ for executable in $LD \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov,gfortran} \
    %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,f951,lto1,lto-wrapper,liblto_plugin.so} \
    %{_bindir}/file \
+   %{_bindir}/sudo \
    %{_bindir}/{find,xargs}
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
