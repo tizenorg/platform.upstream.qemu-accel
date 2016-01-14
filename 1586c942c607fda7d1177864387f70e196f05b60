@@ -1,0 +1,7 @@
+Verified+1: Vyacheslav Barinov <v.barinov@samsung.com>
+Code-Review+2: Dongkyun Son <dongkyun.s@samsung.com>
+Submitted-by: Dongkyun Son <dongkyun.s@samsung.com>
+Submitted-at: Thu, 14 Jan 2016 06:59:20 -0800
+Reviewed-on: https://review.tizen.org/gerrit/57025
+Project: platform/upstream/qemu-accel
+Branch: refs/heads/sandbox/dongkyun.s/tizen_base
