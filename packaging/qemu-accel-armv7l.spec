@@ -55,7 +55,7 @@ BuildRequires:  python-xml
 BuildRequires:  python-magic
 BuildRequires:  python-rpm
 BuildRequires:  file
-BuildRequires:  sudo
+BuildRequires:  sudo acl
 Summary:        Native binaries for speeding up cross compile
 License:        GPL-2.0
 Group:          Development/Cross Compilation
@@ -122,7 +122,8 @@ for executable in $LD \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov,gfortran} \
    %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,f951,lto1,lto-wrapper,liblto_plugin.so} \
    %{_bindir}/file \
-   %{_bindir}/sudo \
+   %{_bindir}/{sudo,getfacl,setfacl} \
+   %{_libexecdir}/sudo/{group_file.so,sudo_noexec.so,sudoers.so,system_group.so} \
    %{_bindir}/{find,xargs}
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
@@ -138,6 +139,9 @@ do
 done | grep -v "not owned" | sed -e "s/-[0-9].*//g" | sort -u
 echo ""
 
+# Create storage for permissions
+mkdir -p %{buildroot}/%{our_path}
+echo '' > %{buildroot}/%{our_path}/permissions.acl
 
 for binary in $binaries
 do
@@ -152,6 +156,7 @@ do
     echo "ERROR file $binary leaks host information into the guest"
     exit 1
   fi
+  getfacl $binary | sed -e '/file:/s|: |: %{our_path}/|' >> %{buildroot}%{our_path}/permissions.acl
   rm -f $outfile.data
   [ "$binary" == "$LD" ] && continue
   patchelf --set-rpath "%{our_path}/%{libdir}" $outfile
@@ -184,6 +189,7 @@ ln -s usr/lib %{buildroot}%{our_path}/lib
 for binary in addr2line ar as c++filt dwp elfedit gprof ld ld.bfd ld.gold nm objcopy objdump ranlib readelf size strings strip
 do
   mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$binary %{buildroot}%{our_path}%{_bindir}/$binary
+  sed -e "/file:/s|%{_bindir}/%{target_arch}-$binary|%{_bindir}/$binary|" -i %{buildroot}%{our_path}/permissions.acl
 done
 
 mkdir -p %{buildroot}/%{our_path}/%{_prefix}/%{target_arch}/bin
@@ -236,6 +242,7 @@ for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib gfortran
 do
   mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}%{_bindir}/$bin
   ln -s $bin %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin
+  sed -e "/file:/s|%{_bindir}/%{target_arch}-$bin|%{_bindir}/$bin|" -i %{buildroot}%{our_path}/permissions.acl
 done
 mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-gcov %{buildroot}%{our_path}%{_bindir}/gcov
 ln -s gcc %{buildroot}%{our_path}/%{_bindir}/cc
@@ -269,6 +276,8 @@ set -x
 # update baselibs.conf, overwrite LTO plugin
 sed -i -e "s,#PLUGIN_POSTIN#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 sed -i -e "s,#PLUGIN_POSTUN#,ln -sf liblto_plugin.so.0 %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
+sed -i -e "s,#PLUGIN_POSTIN_ACL#,%{our_path}/bin/setfacl --restore=%{our_path}/permissions.acl," %{_sourcedir}/baselibs.conf
+sed -i -e "s,#PLUGIN_POSTIN_SUDO#,for f in group_file.so sudo_noexec.so sudoers.so system_group.so; do ln -sf %{our_path}%{_libexecdir}/sudo/\$f %{_libexecdir}/sudo/\$f ; done," %{_sourcedir}/baselibs.conf
 
 # allow build of baselibs.conf
 sed -i -e "/targettype %{cross} block!/d" %{_sourcedir}/baselibs.conf
