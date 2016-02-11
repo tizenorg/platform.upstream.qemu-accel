@@ -118,8 +118,8 @@ for executable in $LD \
    %{_libdir}/python${python_version}/site-packages/*/*.so \
    %{_bindir}/{ccmake,cmake,cpack,ctest} \
    %{_bindir}/%{target_arch}-{addr2line,ar,as,c++filt,dwp,elfedit,gprof,ld,ld.bfd,ld.gold,nm,objcopy,objdump,ranlib,readelf,size,strings,strip} \
-   %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov} \
-   %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,lto1,lto-wrapper,liblto_plugin.so} \
+   %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov,gfortran} \
+   %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,f951,lto1,lto-wrapper,liblto_plugin.so} \
    %{_bindir}/file \
    %{_bindir}/{find,xargs}
 do
@@ -230,7 +230,7 @@ cp %{_libdir}/python${python_version}/encodings/*.py %{buildroot}%{our_path}%{_l
 
 
 # rename gcc binaries
-for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib
+for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib gfortran
 do
   mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}%{_bindir}/$bin
   ln -s $bin %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin
@@ -249,11 +249,11 @@ sed -i -e "s/x86_64/armv7l/g" %{buildroot}%{our_path}%{_bindir}/bash
 
 # create symlinks for gcc build (CC_FOR_TARGET)
 mkdir -p %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc
-for binary in as cpp gcc-ar gcc-nm gcc-ranlib gcov nm
+for binary in as cpp gcc-ar gcc-nm gcc-ranlib gcov gfortran nm
 do
   ln -sf %{our_path}%{_bindir}/${binary} %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/${binary}
 done
-for binary in cc1 cc1plus collect2 lto1 lto-wrapper
+for binary in cc1 cc1plus collect2 f951 lto1 lto-wrapper
 do
   ln -sf %{our_path}/usr/lib/gcc/%{target_arch}/${gcc_version}/${binary} %{buildroot}%{our_path}/home/abuild/rpmbuild/BUILD/gcc-${gcc_version}/obj/gcc/${binary}
 done
