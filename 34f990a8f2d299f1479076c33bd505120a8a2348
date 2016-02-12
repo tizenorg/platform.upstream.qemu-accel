@@ -1,0 +1,8 @@
+Code-Review+1: Hyung-Kyu Choi <hk0110.choi@samsung.com>
+Code-Review+2: Dongkyun Son <dongkyun.s@samsung.com>
+Verified+1: Dongkyun Son <dongkyun.s@samsung.com>
+Submitted-by: Dongkyun Son <dongkyun.s@samsung.com>
+Submitted-at: Thu, 11 Feb 2016 20:21:55 -0800
+Reviewed-on: https://review.tizen.org/gerrit/59240
+Project: platform/upstream/qemu-accel
+Branch: refs/heads/tizen_base
