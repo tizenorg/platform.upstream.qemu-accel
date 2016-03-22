@@ -84,7 +84,7 @@ This package is used in qemu-accel to accelerate python.
 set +x
 gcc_version=`gcc --version | sed -ne '1s/[^0-9]*\(\([0-9]\.\?\)*\).*/\1/p'`
 # just like it is determided in python.spec
-python_version=`python --version  2>&1 | sed -ne '1s/.* //p' | head -c 3`
+python_version=`python --version 2>&1 | sed -ne '1s/.* //p' | head -c 3`
 
 binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
 %ifarch %ix86
@@ -237,6 +237,13 @@ do
 done
 mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-gcov %{buildroot}%{our_path}%{_bindir}/gcov
 ln -s gcc %{buildroot}%{our_path}/%{_bindir}/cc
+
+# Create symlinks that are needed for gcc-force-options and gcc-unforce-options scripts from asan-force-options subpackage of gcc package.
+# Currently asan-force-options subpackage is under development in platform/upstream/linaro-gcc project in sandbox/mro/sanitizer branch.
+# If above scripts are no longer needed this can be safely removed.
+find -L %{buildroot}%{our_path}%{_bindir}/ -type f -a -perm -a=x | grep -E '(gcc|g\+\+|c\+\+)$' | while read tool; do
+  ln -s ${tool##*/} ${tool}-real
+done
 
 # rpmbuild when generating 'requires' tag for gobject-introspection binaries
 # selects (64-bit) suffix for libs based on ${HOSTTYPE} bash variable

@@ -238,6 +238,13 @@ done
 mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-gcov %{buildroot}%{our_path}%{_bindir}/gcov
 ln -s gcc %{buildroot}%{our_path}/%{_bindir}/cc
 
+# Create symlinks that are needed for gcc-force-options and gcc-unforce-options scripts from asan-force-options subpackage of gcc package.
+# Currently asan-force-options subpackage is under development in platform/upstream/linaro-gcc project in sandbox/mro/sanitizer branch.
+# If above scripts are no longer needed this can be safely removed.
+find -L %{buildroot}%{our_path}%{_bindir}/ -type f -a -perm -a=x | grep -E '(gcc|g\+\+|c\+\+)$' | while read tool; do
+  ln -s ${tool##*/} ${tool}-real
+done
+
 # rpmbuild when generating 'requires' tag for gobject-introspection binaries
 # selects (64-bit) suffix for libs based on ${HOSTTYPE} bash variable
 # so we replace x86_64 to armv7l to avoid bogus dependencies
