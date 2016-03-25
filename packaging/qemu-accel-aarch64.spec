@@ -84,7 +84,7 @@ This package is used in qemu-accel to accelerate python.
 set +x
 gcc_version=`gcc --version | sed -ne '1s/[^0-9]*\(\([0-9]\.\?\)*\).*/\1/p'`
 # just like it is determided in python.spec
-python_version=`python --version  2>&1 | sed -ne '1s/.* //p' | head -c 3`
+python_version=`python --version 2>&1 | sed -ne '1s/.* //p' | head -c 3`
 
 binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlopen by glibc
 %ifarch %ix86
@@ -119,7 +119,7 @@ for executable in $LD \
    %{_bindir}/{ccmake,cmake,cpack,ctest} \
    %{_bindir}/%{target_arch}-{addr2line,ar,as,c++filt,dwp,elfedit,gprof,ld,ld.bfd,ld.gold,nm,objcopy,objdump,ranlib,readelf,size,strings,strip} \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov} \
-   %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,lto1,lto-wrapper,liblto_plugin.so} \
+   %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,lto1,lto-wrapper,liblto_plugin.so,libfunction_reordering_plugin.so} \
    %{_bindir}/file \
    %{_bindir}/{find,xargs}
 do
@@ -267,6 +267,8 @@ set -x
 # update baselibs.conf, overwrite LTO plugin
 sed -i -e "s,#PLUGIN_POSTIN#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 sed -i -e "s,#PLUGIN_POSTUN#,ln -sf liblto_plugin.so.0 %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
+sed -i -e "s,#REORDERING_PLUGIN_POSTIN#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/libfunction_reordering_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/libfunction_reordering_plugin.so," %{_sourcedir}/baselibs.conf
+sed -i -e "s,#REORDERING_PLUGIN_POSTUN#,ln -sf libfunction_reordering_plugin.so.0 %{libdir}/gcc/%{target_arch}/${gcc_version}/libfunction_reordering_plugin.so.0," %{_sourcedir}/baselibs.conf
 
 # allow build of baselibs.conf
 sed -i -e "/targettype %{cross} block!/d" %{_sourcedir}/baselibs.conf
