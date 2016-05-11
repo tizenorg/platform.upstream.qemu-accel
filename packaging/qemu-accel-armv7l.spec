@@ -94,6 +94,13 @@ binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlo
   LD="/%{_lib}/ld-linux-x86-64.so.2"
 %endif
 
+# Check if we use toolchain with sanitizers support
+sanitizer_enabled=`[ -f /usr/bin/gcc-force-options ]`
+if $sanitizer_enabled; then
+   real_compiler=`find %{_bindir} -name '*-real' -printf '%{_bindir}/%%f '`
+   real_compiler+=`find %{_libdir} -name 'lib*san.so*' -printf '%{_libdir}/%%f '`
+fi
+
 for executable in $LD \
    %{_bindir}/bash \
    %{_bindir}/{rpm,rpm2cpio,rpmdb,rpmkeys,rpmqpack,rpmbuild,rpmsign,rpmspec} \
@@ -121,6 +128,7 @@ for executable in $LD \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov} \
    %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,lto1,lto-wrapper,liblto_plugin.so} \
    %{_bindir}/file \
+   ${real_compiler} \
    %{_bindir}/{find,xargs,readlink,ls}
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
@@ -139,6 +147,10 @@ echo ""
 
 for binary in $binaries
 do
+  # We don't need to accelerate shell scripts
+  filetype=`file --brief $binary`
+  [[ x"$filetype" == x"POSIX shell script"* ]] && continue
+
   outfile=%{buildroot}/%{our_path}/$binary
   [ -f $outfile ] && continue
   mkdir -p ${outfile%/*}
@@ -230,7 +242,13 @@ cp %{_libdir}/python${python_version}/encodings/*.py %{buildroot}%{our_path}%{_l
 
 
 # rename gcc binaries
-for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib
+for bin in c++ g++ gcc
+do
+  $sanitizer_enabled && bin+="-real"
+  mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}%{_bindir}/$bin
+  ln -s $bin %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin
+done
+for bin in cpp gcc-ar gcc-nm gcc-ranlib
 do
   mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}%{_bindir}/$bin
   ln -s $bin %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin
@@ -264,6 +282,14 @@ ln -sf %{our_path}%{_bindir}/g++ %{buildroot}%{our_path}/home/abuild/rpmbuild/BU
 ln -sf %{our_path}%{_bindir}/cpp %{buildroot}%{our_path}/usr/lib/cpp
 
 set -x
+# If we are in sanitized project the accelerated binaries must also have their own preload.
+# This won't cause any issues with wrong architecture since linaro-glibc is already patched to ignore these errors
+if $sanitizer_enabled; then
+   sed -i -e '/[[:space:]]\+post "#PLUGIN_POSTIN#"/a  post "#ASAN_POSTIN#"' %{_sourcedir}/baselibs.conf
+   sed -i -e '/[[:space:]]\+post "#PLUGIN_POSTUN#"/a  post "#ASAN_POSTUN#"' %{_sourcedir}/baselibs.conf
+   sed -i -e "s,#ASAN_POSTIN#,grep 'libasan' /etc/ld.so.preload && echo '%{our_path}%{_libdir}/libasan.so' >> /etc/ld.so.preload," %{_sourcedir}/baselibs.conf
+   sed -i -e "s,#ASAN_POSTUN#,sed -e '\|%{our_path}%{_libdir}/libasan.so|d' -i /etc/ld.so.preload," %{_sourcedir}/baselibs.conf
+fi
 # update baselibs.conf, overwrite LTO plugin
 sed -i -e "s,#PLUGIN_POSTIN#,ln -sf %{our_path}%{_libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
 sed -i -e "s,#PLUGIN_POSTUN#,ln -sf liblto_plugin.so.0 %{libdir}/gcc/%{target_arch}/${gcc_version}/liblto_plugin.so," %{_sourcedir}/baselibs.conf
