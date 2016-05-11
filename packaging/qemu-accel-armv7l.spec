@@ -94,6 +94,12 @@ binaries="%{_libdir}/libnsl.so.1 %{_libdir}/libnss_compat.so.2" # loaded via dlo
   LD="/%{_lib}/ld-linux-x86-64.so.2"
 %endif
 
+# Check if we use toolchain with sanitizers support
+[ -f /usr/bin/gcc-force-options ] && sanitizer_enabled=1
+if [ x"$sanitizer_enabled" == x"1" ]; then
+   real_compiler=`find %{_bindir} -name '*-real' -printf '%{_bindir}/%%f '`
+fi
+
 for executable in $LD \
    %{_bindir}/bash \
    %{_bindir}/{rpm,rpm2cpio,rpmdb,rpmkeys,rpmqpack,rpmbuild,rpmsign,rpmspec} \
@@ -102,6 +108,7 @@ for executable in $LD \
    %{_bindir}/{tar,gzip,bzip2,xz,xzdec} \
    %{_bindir}/{grep,sed} \
    %{_libdir}/libnssdbm3.so %{_libdir}/libsoftokn3.so %{_libdir}/libfreebl3.so \
+   %{_libdir}/lib*san.so* \
    %{_bindir}/{cat,expr,mkdir,mv,rm,rmdir} \
    %{_bindir}/{msgexec,msgfmt,msgcat,msgmerge} \
    %{_bindir}/make \
@@ -121,6 +128,7 @@ for executable in $LD \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov} \
    %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,lto1,lto-wrapper,liblto_plugin.so} \
    %{_bindir}/file \
+   ${real_compiler} \
    %{_bindir}/{find,xargs,readlink,ls}
 do
   binaries="$binaries $executable `ldd $executable | sed -n 's,.*=> \(/[^ ]*\) .*,\1,p'`"
@@ -139,6 +147,10 @@ echo ""
 
 for binary in $binaries
 do
+  # We don't need to accelerate shell scripts
+  filetype=`file --brief $binary`
+  [[ x"$filetype" == x"POSIX shell script"* ]] && continue
+
   outfile=%{buildroot}/%{our_path}/$binary
   [ -f $outfile ] && continue
   mkdir -p ${outfile%/*}
@@ -230,7 +242,13 @@ cp %{_libdir}/python${python_version}/encodings/*.py %{buildroot}%{our_path}%{_l
 
 
 # rename gcc binaries
-for bin in c++ g++ cpp gcc gcc-ar gcc-nm gcc-ranlib
+for bin in c++ g++ gcc
+do
+  [ x"$sanitizer_enabled" == x"1" ] && bin+="-real"
+  mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}%{_bindir}/$bin
+  ln -s $bin %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin
+done
+for bin in cpp gcc-ar gcc-nm gcc-ranlib
 do
   mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin %{buildroot}/%{our_path}%{_bindir}/$bin
   ln -s $bin %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$bin
