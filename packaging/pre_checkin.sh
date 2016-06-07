@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # the script takes qemu-accel.spec and creates the qemu-accel-* packages
-for arch in armv7l aarch64; do
+for arch in armv7l aarch64 mips; do
 
    echo -n "Building package for $arch --> gcc-$arch ..."
 
@@ -11,4 +11,3 @@ for arch in armv7l aarch64; do
    cat qemu-accel.spec.in >> qemu-accel-${arch}.spec
    echo " done."
 done
-

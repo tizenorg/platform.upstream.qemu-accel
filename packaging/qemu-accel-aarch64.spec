@@ -124,7 +124,7 @@ for executable in $LD \
    %{_libdir}/python${python_version}/lib-dynload/*.so \
    %{_libdir}/python${python_version}/site-packages/*/*.so \
    %{_bindir}/{ccmake,cmake,cpack,ctest} \
-   %{_bindir}/%{target_arch}-{addr2line,ar,as,c++filt,dwp,elfedit,gprof,ld,ld.bfd,ld.gold,nm,objcopy,objdump,ranlib,readelf,size,strings,strip} \
+   %{_bindir}/%{target_arch}-{addr2line,ar,as,c++filt,elfedit,gprof,ld,ld.bfd%{!?mips:,ld.gold},nm,objcopy,objdump,ranlib,readelf,size,strings,strip} \
    %{_bindir}/%{target_arch}-{c++,g++,cpp,gcc,gcc-${gcc_version},gcc-ar,gcc-nm,gcc-ranlib,gcov} \
    %{libdir}/gcc/%{target_arch}/${gcc_version}/{cc1,cc1plus,collect2,lto1,lto-wrapper,liblto_plugin.so} \
    %{_bindir}/file \
@@ -171,6 +171,10 @@ do
   fi
 done
 
+# set up ldconfig
+mkdir -p %{buildroot}%{our_path}/%{_sbindir}
+cp /usr/sbin/ldconfig %{buildroot}%{our_path}/%{_sbindir}/ldconfig
+
 # create symlinks for bash
 ln -s usr/bin "%{buildroot}%{our_path}/bin"
 ln -sf bash "%{buildroot}%{our_path}/usr/bin/sh"
@@ -189,15 +193,17 @@ mv %{buildroot}%{our_path}/usr/lib_new %{buildroot}%{our_path}/usr/lib
 ln -s lib %{buildroot}%{our_path}/usr/lib64
 ln -s usr/lib %{buildroot}%{our_path}/lib64
 ln -s usr/lib %{buildroot}%{our_path}/lib
+ln -s usr/bin %{buildroot}%{our_path}/bin
+ln -s usr/sbin %{buildroot}%{our_path}/sbin
 
 # rename binutils binaries
-for binary in addr2line ar as c++filt dwp elfedit gprof ld ld.bfd ld.gold nm objcopy objdump ranlib readelf size strings strip
+for binary in addr2line ar as c++filt elfedit gprof ld ld.bfd %{!?mips:ld.gold} nm objcopy objdump ranlib readelf size strings strip
 do
   mv %{buildroot}%{our_path}%{_bindir}/%{target_arch}-$binary %{buildroot}%{our_path}%{_bindir}/$binary
 done
 
 mkdir -p %{buildroot}/%{our_path}/%{_prefix}/%{target_arch}/bin
-for binary in ar as ld{,.bfd,.gold} nm obj{copy,dump} ranlib strip; do
+for binary in ar as ld{,.bfd%{!?mips:,.gold}} nm obj{copy,dump} ranlib strip; do
   ln -sf %{our_path}%{_bindir}/$binary %{buildroot}%{our_path}%{_prefix}/%{target_arch}/bin/$binary
 done
 
